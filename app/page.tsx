@@ -1,45 +1,37 @@
 "use client";
 
 import { useState } from "react";
-import MyStoryBank from "@/components/MyStoryBank";
-import LocalVeteranInsight from "@/components/LocalVeteranInsight";
-import CommunityPipelines from "@/components/CommunityPipelines";
+import DigitalTwin from "@/components/DigitalTwin";
+import PersonaRAG from "@/components/PersonaRAG";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"story" | "insight" | "pipeline">("story");
+  const [activeTab, setActiveTab] = useState<"twin" | "rag">("twin");
 
   return (
     <main className="container animate-fade-up">
       <div className="header-area">
-        <h1 className="header-title">달나루 V50</h1>
-        <p className="header-desc">세상의 모든 지혜와 맥락을 모으다</p>
+        <h1 className="header-title">달나루 V60</h1>
+        <p className="header-desc">내 삶의 디지털 쌍둥이 & 페르소나 RAG</p>
       </div>
 
       <div className="tabs-container">
         <button 
-          className={`tab ${activeTab === "story" ? "active" : ""}`}
-          onClick={() => setActiveTab("story")}
+          className={`tab ${activeTab === "twin" ? "active" : ""}`}
+          onClick={() => setActiveTab("twin")}
         >
-          마이 스토리 뱅크
+          나의 디지털 쌍둥이 (B2C)
         </button>
         <button 
-          className={`tab ${activeTab === "insight" ? "active" : ""}`}
-          onClick={() => setActiveTab("insight")}
+          className={`tab ${activeTab === "rag" ? "active" : ""}`}
+          onClick={() => setActiveTab("rag")}
         >
-          토박이 인사이트
-        </button>
-        <button 
-          className={`tab ${activeTab === "pipeline" ? "active" : ""}`}
-          onClick={() => setActiveTab("pipeline")}
-        >
-          AI 블록 공작소
+          페르소나 리서치 (B2B)
         </button>
       </div>
 
       <div style={{ minHeight: '60vh', position: 'relative' }}>
-        {activeTab === "story" && <MyStoryBank />}
-        {activeTab === "insight" && <LocalVeteranInsight />}
-        {activeTab === "pipeline" && <CommunityPipelines />}
+        {activeTab === "twin" && <DigitalTwin />}
+        {activeTab === "rag" && <PersonaRAG />}
       </div>
     </main>
   );
