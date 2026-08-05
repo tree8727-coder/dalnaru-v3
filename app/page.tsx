@@ -1,45 +1,45 @@
 "use client";
 
 import { useState } from "react";
-import MicroTaskMatching from "@/components/MicroTaskMatching";
-import AIWorkflows from "@/components/AIWorkflows";
-import AIVoiceConcierge from "@/components/AIVoiceConcierge";
+import MyStoryBank from "@/components/MyStoryBank";
+import LocalObserver from "@/components/LocalObserver";
+import CommunityPipelines from "@/components/CommunityPipelines";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"tasks" | "workflows" | "voice">("tasks");
+  const [activeTab, setActiveTab] = useState<"story" | "observer" | "pipeline">("story");
 
   return (
     <main className="container animate-fade-up">
       <div className="header-area">
-        <h1 className="header-title">달나루 V30</h1>
-        <p className="header-desc">경험을 가치로, 일상을 더 편하게</p>
+        <h1 className="header-title">달나루 V40</h1>
+        <p className="header-desc">우리의 경험이 세상의 데이터가 됩니다</p>
       </div>
 
       <div className="tabs-container">
         <button 
-          className={`tab ${activeTab === "tasks" ? "active" : ""}`}
-          onClick={() => setActiveTab("tasks")}
+          className={`tab ${activeTab === "story" ? "active" : ""}`}
+          onClick={() => setActiveTab("story")}
         >
-          경험으로 돈벌기
+          마이 스토리 뱅크
         </button>
         <button 
-          className={`tab ${activeTab === "workflows" ? "active" : ""}`}
-          onClick={() => setActiveTab("workflows")}
+          className={`tab ${activeTab === "observer" ? "active" : ""}`}
+          onClick={() => setActiveTab("observer")}
         >
-          AI 파이프라인
+          동네 옵저버
         </button>
         <button 
-          className={`tab ${activeTab === "voice" ? "active" : ""}`}
-          onClick={() => setActiveTab("voice")}
+          className={`tab ${activeTab === "pipeline" ? "active" : ""}`}
+          onClick={() => setActiveTab("pipeline")}
         >
-          일상 비서
+          블록 파이프라인
         </button>
       </div>
 
       <div style={{ minHeight: '60vh', position: 'relative' }}>
-        {activeTab === "tasks" && <MicroTaskMatching />}
-        {activeTab === "workflows" && <AIWorkflows />}
-        {activeTab === "voice" && <AIVoiceConcierge />}
+        {activeTab === "story" && <MyStoryBank />}
+        {activeTab === "observer" && <LocalObserver />}
+        {activeTab === "pipeline" && <CommunityPipelines />}
       </div>
     </main>
   );
