@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Calculator, AlertCircle, TrendingUp, Download, ArrowRight } from "lucide-react";
+import { Calculator, AlertCircle, TrendingUp, Download, ArrowRight, X } from "lucide-react";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 export default function PensionCalculator() {
   const [gender, setGender] = useState("male");
@@ -14,14 +16,18 @@ export default function PensionCalculator() {
     shortfall: number;
   } | null>(null);
 
+  const [modalOpen, setModalOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const calculatePension = (e: React.FormEvent) => {
     e.preventDefault();
     if (!workYears || !lastSalary || !livingCost) return;
     
     // 간소화된 국민연금 예상 수령액 공식 (통계적 추정치)
-    // 기본금 + (근무년수 * 가중치) + (소득 * 가중치)
     let estimatedPension = 30 + (Number(workYears) * 2.5) + (Number(lastSalary) * 0.12);
-    if (gender === 'female') estimatedPension *= 0.95; // 임의의 통계적 보정
+    if (gender === 'female') estimatedPension *= 0.95; 
     
     // 최대 수령액 상한선 적용 (약 250만원)
     estimatedPension = Math.min(Math.round(estimatedPension), 250);
@@ -32,6 +38,36 @@ export default function PensionCalculator() {
       pension: estimatedPension,
       shortfall: shortfall
     });
+  };
+
+  const handleDownload = () => {
+    setModalOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !phone || !result) return;
+    
+    setIsSubmitting(true);
+    try {
+      await addDoc(collection(db, "leads"), {
+        service: "가이드북 다운로드",
+        name,
+        phone,
+        diagnosticResult: result,
+        inputs: { gender, workYears, lastSalary, livingCost },
+        createdAt: serverTimestamp(),
+      });
+      alert(`신청이 완료되었습니다! 입력하신 번호(${phone})로 카카오톡 PDF를 발송해 드리겠습니다.`);
+      setModalOpen(false);
+      setName("");
+      setPhone("");
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      alert("신청 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -175,13 +211,59 @@ export default function PensionCalculator() {
           )}
 
           <div style={{ marginTop: '24px', display: 'flex', gap: '12px', flexDirection: 'column' }}>
-            <button style={{ background: 'var(--bg-color)', border: '1px solid var(--border-color)', padding: '16px', borderRadius: '8px', color: 'white', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}>
+            <button onClick={handleDownload} style={{ background: 'var(--bg-color)', border: '1px solid var(--border-color)', padding: '16px', borderRadius: '8px', color: 'white', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s', cursor: 'pointer' }}>
               <Download size={20} />
               <span>5060 은퇴 방어 파이프라인 가이드북 (PDF) 무료 다운로드</span>
             </button>
           </div>
         </div>
       )}
+
+      {/* Modal for PDF Lead Gen */}
+      {modalOpen && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' }}>
+          <div className="card animate-fade-in" style={{ width: '100%', maxWidth: '400px', padding: '32px', position: 'relative' }}>
+            <button onClick={() => setModalOpen(false)} style={{ position: 'absolute', top: '16px', right: '16px', color: 'var(--text-secondary)' }}>
+              <X size={24} />
+            </button>
+            <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '8px' }}>가이드북 신청하기</h3>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>연락처를 남겨주시면 카카오톡으로 PDF를 즉시 발송해 드립니다.</p>
+            
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>성함</label>
+                <input 
+                  type="text" 
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="홍길동"
+                  style={{ width: '100%', padding: '14px', borderRadius: '8px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white', fontSize: '1.1rem', outline: 'none' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>휴대폰 번호</label>
+                <input 
+                  type="tel" 
+                  required
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="010-1234-5678"
+                  style={{ width: '100%', padding: '14px', borderRadius: '8px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white', fontSize: '1.1rem', outline: 'none' }}
+                />
+              </div>
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                style={{ marginTop: '8px', width: '100%', padding: '16px', borderRadius: '8px', background: 'var(--primary)', color: 'white', fontSize: '1.1rem', fontWeight: 700, opacity: isSubmitting ? 0.7 : 1 }}
+              >
+                {isSubmitting ? '전송 중...' : 'PDF 받기'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

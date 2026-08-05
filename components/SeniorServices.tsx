@@ -1,10 +1,44 @@
 "use client";
 
-import { Users, PhoneCall, CheckCircle2, ChevronRight, BookOpen, ShieldCheck } from "lucide-react";
+import { useState } from "react";
+import { Users, PhoneCall, CheckCircle2, ChevronRight, BookOpen, ShieldCheck, X } from "lucide-react";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 export default function SeniorServices() {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleApply = (serviceName: string) => {
-    alert(`[MVP 데모] ${serviceName} 사전 예약 폼으로 이동합니다. (현재 준비 중)`);
+    setSelectedService(serviceName);
+    setModalOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !phone) return;
+    
+    setIsSubmitting(true);
+    try {
+      await addDoc(collection(db, "leads"), {
+        service: selectedService,
+        name,
+        phone,
+        createdAt: serverTimestamp(),
+      });
+      alert(`[${selectedService}] 사전 신청이 완료되었습니다! 안내 문자를 발송해 드리겠습니다.`);
+      setModalOpen(false);
+      setName("");
+      setPhone("");
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      alert("신청 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -99,6 +133,51 @@ export default function SeniorServices() {
           </button>
         </div>
       </div>
+
+      {/* Modal */}
+      {modalOpen && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' }}>
+          <div className="card animate-fade-in" style={{ width: '100%', maxWidth: '400px', padding: '32px', position: 'relative' }}>
+            <button onClick={() => setModalOpen(false)} style={{ position: 'absolute', top: '16px', right: '16px', color: 'var(--text-secondary)' }}>
+              <X size={24} />
+            </button>
+            <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '8px' }}>{selectedService} 사전 예약</h3>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>연락처를 남겨주시면, 서비스 정식 오픈 시 가장 먼저 안내 문자를 보내드립니다.</p>
+            
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>성함</label>
+                <input 
+                  type="text" 
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="홍길동"
+                  style={{ width: '100%', padding: '14px', borderRadius: '8px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white', fontSize: '1.1rem', outline: 'none' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>휴대폰 번호</label>
+                <input 
+                  type="tel" 
+                  required
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="010-1234-5678"
+                  style={{ width: '100%', padding: '14px', borderRadius: '8px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'white', fontSize: '1.1rem', outline: 'none' }}
+                />
+              </div>
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                style={{ marginTop: '8px', width: '100%', padding: '16px', borderRadius: '8px', background: 'var(--primary)', color: 'white', fontSize: '1.1rem', fontWeight: 700, opacity: isSubmitting ? 0.7 : 1 }}
+              >
+                {isSubmitting ? '전송 중...' : '신청 완료하기'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );
