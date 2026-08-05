@@ -2,17 +2,17 @@
 
 import { useState } from "react";
 import MyStoryBank from "@/components/MyStoryBank";
-import LocalObserver from "@/components/LocalObserver";
+import LocalVeteranInsight from "@/components/LocalVeteranInsight";
 import CommunityPipelines from "@/components/CommunityPipelines";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"story" | "observer" | "pipeline">("story");
+  const [activeTab, setActiveTab] = useState<"story" | "insight" | "pipeline">("story");
 
   return (
     <main className="container animate-fade-up">
       <div className="header-area">
-        <h1 className="header-title">달나루 V40</h1>
-        <p className="header-desc">우리의 경험이 세상의 데이터가 됩니다</p>
+        <h1 className="header-title">달나루 V50</h1>
+        <p className="header-desc">세상의 모든 지혜와 맥락을 모으다</p>
       </div>
 
       <div className="tabs-container">
@@ -23,22 +23,22 @@ export default function Home() {
           마이 스토리 뱅크
         </button>
         <button 
-          className={`tab ${activeTab === "observer" ? "active" : ""}`}
-          onClick={() => setActiveTab("observer")}
+          className={`tab ${activeTab === "insight" ? "active" : ""}`}
+          onClick={() => setActiveTab("insight")}
         >
-          동네 옵저버
+          토박이 인사이트
         </button>
         <button 
           className={`tab ${activeTab === "pipeline" ? "active" : ""}`}
           onClick={() => setActiveTab("pipeline")}
         >
-          블록 파이프라인
+          AI 블록 공작소
         </button>
       </div>
 
       <div style={{ minHeight: '60vh', position: 'relative' }}>
         {activeTab === "story" && <MyStoryBank />}
-        {activeTab === "observer" && <LocalObserver />}
+        {activeTab === "insight" && <LocalVeteranInsight />}
         {activeTab === "pipeline" && <CommunityPipelines />}
       </div>
     </main>
