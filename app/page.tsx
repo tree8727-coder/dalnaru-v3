@@ -1,61 +1,45 @@
 "use client";
 
 import { useState } from "react";
-import Certifications from "@/components/Certifications";
-import PensionCalculator from "@/components/PensionCalculator";
-import SeniorMentoring from "@/components/SeniorMentoring";
-import AITelemarket from "@/components/AITelemarket";
-import AITools from "@/components/AITools";
+import MicroTaskMatching from "@/components/MicroTaskMatching";
+import AIWorkflows from "@/components/AIWorkflows";
+import AIVoiceConcierge from "@/components/AIVoiceConcierge";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"pension" | "mentoring" | "jobs" | "ai" | "telemarket">("pension");
+  const [activeTab, setActiveTab] = useState<"tasks" | "workflows" | "voice">("tasks");
 
   return (
-    <main className="container animate-fade-in">
+    <main className="container animate-fade-up">
       <div className="header-area">
-        <h1 className="header-title">5060 반퇴자를 위한 두 번째 항해, 달나루</h1>
-        <p className="header-desc">필요한 정보를 입력할 필요 없이, 접속하자마자 즉시 원하는 콘텐츠를 찾아보세요.</p>
+        <h1 className="header-title">달나루 V30</h1>
+        <p className="header-desc">경험을 가치로, 일상을 더 편하게</p>
       </div>
 
       <div className="tabs-container">
         <button 
-          className={`tab ${activeTab === "pension" ? "active" : ""}`}
-          onClick={() => setActiveTab("pension")}
+          className={`tab ${activeTab === "tasks" ? "active" : ""}`}
+          onClick={() => setActiveTab("tasks")}
         >
-          📊 은퇴 자산 진단기
+          경험으로 돈벌기
         </button>
         <button 
-          className={`tab ${activeTab === "mentoring" ? "active" : ""}`}
-          onClick={() => setActiveTab("mentoring")}
+          className={`tab ${activeTab === "workflows" ? "active" : ""}`}
+          onClick={() => setActiveTab("workflows")}
         >
-          🤝 시니어 전문가 매칭
+          AI 파이프라인
         </button>
         <button 
-          className={`tab ${activeTab === "jobs" ? "active" : ""}`}
-          onClick={() => setActiveTab("jobs")}
+          className={`tab ${activeTab === "voice" ? "active" : ""}`}
+          onClick={() => setActiveTab("voice")}
         >
-          💼 5060 유망 자격증 분석
-        </button>
-        <button 
-          className={`tab ${activeTab === "ai" ? "active" : ""}`}
-          onClick={() => setActiveTab("ai")}
-        >
-          🛠️ AI 창업 도구 & 레시피
-        </button>
-        <button 
-          className={`tab ${activeTab === "telemarket" ? "active" : ""}`}
-          onClick={() => setActiveTab("telemarket")}
-        >
-          🎙️ AI 텔레마켓 비서
+          일상 비서
         </button>
       </div>
 
-      <div style={{ minHeight: '60vh' }}>
-        {activeTab === "pension" && <PensionCalculator />}
-        {activeTab === "mentoring" && <SeniorMentoring />}
-        {activeTab === "jobs" && <Certifications />}
-        {activeTab === "ai" && <AITools />}
-        {activeTab === "telemarket" && <AITelemarket />}
+      <div style={{ minHeight: '60vh', position: 'relative' }}>
+        {activeTab === "tasks" && <MicroTaskMatching />}
+        {activeTab === "workflows" && <AIWorkflows />}
+        {activeTab === "voice" && <AIVoiceConcierge />}
       </div>
     </main>
   );
