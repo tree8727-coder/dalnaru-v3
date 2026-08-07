@@ -1,4 +1,34 @@
-# 달나루 프로젝트 핸드오버 (최종 MVP 릴리스용)
+# 달나루 프로젝트 핸드오버
+
+## 2026-08-08 · 디자인 토큰을 vault 브랜드로 교체 (이슈 #1, Claude Code)
+
+**바꾼 것** — `app/globals.css`만. 색 외에는 안 건드림.
+
+- `:root` 전체를 vault 브랜드 토큰으로 교체 (출처: `vault/AI-Sessions/wiki/design/brand-usage-content.md`)
+- `.btn-primary` 글자색 `#fff` → `var(--bg-color)` — 옐로 면에 흰 글자는 1.5:1로 안 보임
+- `pulse-ring` 애니메이션의 옛 파랑 rgba → 반달 옐로 rgba
+
+**정한 값과 대비** (최악 배경인 card-hover 기준)
+
+| 토큰 | 값 | 대비 |
+| --- | --- | --- |
+| `--bg-card` / `--bg-card-hover` | `#28356E` / `#313F7D` | 네이비 밝힘 1·2단 |
+| `--text-secondary` | `#D5D0BC` | 6.35:1 ✅ |
+| `--text-muted` | `#B9B4A0` | 4.72:1 ✅ (기존 `#636366`은 3.51:1 미달이었음) |
+| 버튼 글자 (네이비 on 옐로) | | 10.95:1 ✅ |
+
+`npm run build` 통과.
+
+**사람이 확인할 것**
+
+1. 실제 화면 느낌 — `npm run dev`로 열어볼 것 (네이비+크림이 5070에게 어떤지)
+2. 컴포넌트 5개 파일에 **기존부터 박혀 있던 HEX 30곳** — 이번 범위 밖이라 안 건드림.
+   토스 팔레트 잔재가 남아 있을 수 있음. 후속 이슈 후보
+3. 브랜드 색이 아직 `draft`임 — 컨셉 재정의 후 바뀌면 이 파일 `:root`만 고치면 됨
+
+---
+
+## (이전) 최종 MVP 릴리스용 핸드오버
 
 ## 1. 프로젝트 개요 및 현재 상태
 - **경로:** `C:\Users\tree0\.gemini\antigravity\scratch\dalnaru-v3`
