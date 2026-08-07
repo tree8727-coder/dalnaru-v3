@@ -27,6 +27,11 @@ export default function Home() {
           <span className="landing-card-title">기업에 바로 내는 이력서 만들기</span>
           <span className="landing-card-desc">버튼만 눌러 대답하면 됩니다. 3분. 맞는 일자리도 함께 찾아드립니다.</span>
         </Link>
+        <Link href="/guide" className="landing-card">
+          <span className="landing-card-emoji">🧰</span>
+          <span className="landing-card-title">작은 창업·부업, 뭐부터 하면 돼요?</span>
+          <span className="landing-card-desc">분야마다 제일 좋은 방법 딱 하나씩만, 눈높이에 맞춰 알려드립니다.</span>
+        </Link>
       </div>
 
       <p className="landing-foot">응답은 이름 없이 보관됩니다 · 무료입니다</p>

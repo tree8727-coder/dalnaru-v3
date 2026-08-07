@@ -589,6 +589,64 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
 .calc-cta-btn { text-align: center; }
 .calc-source { font-size: 0.78rem; line-height: 1.6; color: var(--text-muted); }
 
+/* ===== 워크플로우 가이드 ===== */
+.guide-head { display: flex; gap: 12px; align-items: flex-start; }
+.guide-icon { font-size: 2rem; }
+.guide-title { font-size: 1.25rem; font-weight: 800; line-height: 1.4; color: var(--text-primary); }
+.guide-oneliner { font-size: 0.98rem; line-height: 1.55; color: var(--text-secondary); margin-top: 4px; }
+.guide-why {
+  margin-top: 12px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--text-primary);
+  background: rgba(254, 228, 162, 0.1);
+  border-left: 3px solid var(--primary);
+  border-radius: 0 10px 10px 0;
+}
+.guide-steps { margin: 14px 0 0 0; padding-left: 22px; }
+.guide-steps li { font-size: 1rem; line-height: 1.6; color: var(--text-primary); margin-bottom: 8px; }
+.code-block {
+  margin-top: 12px;
+  border-radius: 12px;
+  background: rgba(10, 14, 40, 0.6);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+.code-block.prompt { border-color: rgba(254, 228, 162, 0.35); }
+.code-block-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+.code-block pre {
+  padding: 12px;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--primary);
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: Consolas, monospace;
+}
+.code-copy {
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--bg-color);
+  background: var(--primary);
+  border-radius: 999px;
+}
+.guide-easy { margin-top: 14px; }
+.guide-needs { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-color); }
+.guide-thanks { margin-top: 16px; font-size: 0.95rem; font-weight: 700; color: var(--primary); }
+.guide-links { display: flex; gap: 16px; margin-top: 16px; }
+.guide-links a { font-size: 0.92rem; font-weight: 700; color: var(--accent); text-decoration: underline; }
+
 /* ===== 지급 후 업그레이드 (자유 서술) ===== */
 .enrich-wrap { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
 .enrich-card {
