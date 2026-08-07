@@ -77,7 +77,7 @@ export default function GuidePage() {
         {/* Q2: 눈높이 */}
         {stage !== 'goal' && recipe && (
           <>
-            <p className="calc-sub" style={{ marginTop: 8 }}>컴퓨터는 어느 정도 편하세요? 거기에 맞춰 설명드릴게요.</p>
+            <p className="calc-sub" style={{ marginTop: 8 }}>어떻게 설명드릴까요?</p>
             <div className="funnel-chips" style={{ padding: '4px 0' }}>
               {SKILL_CHIPS.map((c) => (
                 <button
@@ -118,7 +118,7 @@ export default function GuidePage() {
 
             {skill === 'easy' ? (
               <p className="guide-easy-note">
-                설치에는 명령어 입력이 몇 줄 필요합니다. 위 「설치 정도는 할 수 있어요」를 누르면 그대로 보여드립니다.
+                설치에는 명령어 몇 줄이 필요합니다. 위 「따라 할 수 있게 자세히」를 누르면 그대로 보여드립니다.
               </p>
             ) : (
               <>

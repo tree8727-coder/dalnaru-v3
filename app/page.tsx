@@ -30,7 +30,12 @@ export default function Home() {
           <span className="landing-card-title">내 은퇴 자금, 몇 살까지 버틸까?</span>
           <span className="landing-card-desc">네 가지만 맞추면 바로 계산됩니다. 1분.</span>
         </Link>
-        {/* 트래픽 유인책 — 검색 수요가 다른 세 번째 문. 메인(이력서)보다 작게 */}
+        {/* 트래픽 유인책들 — 검색 수요가 각기 다른 문. 메인(이력서)보다 작게 */}
+        <Link href="/call" className="landing-card">
+          <span className="landing-card-emoji">📞</span>
+          <span className="landing-card-title">어디에 전화해야 하죠?</span>
+          <span className="landing-card-desc">연금·세금·보이스피싱… 상황별 전화번호와 말할 내용까지.</span>
+        </Link>
         <Link href="/guide" className="landing-card">
           <span className="landing-card-emoji">🏆</span>
           <span className="landing-card-title">일 잘하는 사람들의 자동화 도구, 분야별 1등만</span>

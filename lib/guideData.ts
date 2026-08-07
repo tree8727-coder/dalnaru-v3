@@ -24,16 +24,18 @@ export interface GuideRecipe {
   stars: string;         // GitHub 별 수 — v5 실측값(2026-08-08). 진짜 사회적 증거
 }
 
+/* 실력을 자백하게 하지 않는다("문서 작업 정도 해요"는 자존감 원칙 위반).
+ * 대신 원하는 설명 방식을 고르게 한다 — 같은 정보, 다른 눈높이. */
 export const SKILL_CHIPS = [
-  { emoji: '📄', label: '문서 작업 정도 해요' },
-  { emoji: '🔧', label: '설치 정도는 할 수 있어요' },
-  { emoji: '💻', label: '개발 경험 있어요' },
+  { emoji: '💬', label: '뭐가 좋아지는지 쉽게' },
+  { emoji: '📋', label: '따라 할 수 있게 자세히' },
+  { emoji: '⚡', label: '핵심만 빠르게' },
 ];
 export type SkillLevel = 'easy' | 'mid' | 'pro';
 export const SKILL_MAP: Record<string, SkillLevel> = {
-  '문서 작업 정도 해요': 'easy',
-  '설치 정도는 할 수 있어요': 'mid',
-  '개발 경험 있어요': 'pro',
+  '뭐가 좋아지는지 쉽게': 'easy',
+  '따라 할 수 있게 자세히': 'mid',
+  '핵심만 빠르게': 'pro',
 };
 
 export const GUIDES: GuideRecipe[] = [
