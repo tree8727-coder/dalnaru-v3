@@ -66,7 +66,8 @@ export default function GuidePage() {
                 navigator.vibrate?.(10);
                 setRecipe(g);
                 record('goal', g.goalChip);
-                if (stage === 'goal') setStage('skill');
+                // 기본은 "따라 할 수 있게 자세히"(mid) — 바로 레시피를 준다 (유재원 지정)
+                setStage('recipe');
               }}
             >
               {g.icon} {g.goalChip}
@@ -74,27 +75,23 @@ export default function GuidePage() {
           ))}
         </div>
 
-        {/* Q2: 눈높이 */}
-        {stage !== 'goal' && recipe && (
-          <>
-            <p className="calc-sub" style={{ marginTop: 8 }}>어떻게 설명드릴까요?</p>
-            <div className="funnel-chips" style={{ padding: '4px 0' }}>
-              {SKILL_CHIPS.map((c) => (
-                <button
-                  key={c.label}
-                  className={`funnel-chip ${SKILL_MAP[c.label] === skill && stage === 'recipe' ? 'chip-on' : ''}`}
-                  onClick={() => {
-                    navigator.vibrate?.(10);
-                    setSkill(SKILL_MAP[c.label]);
-                    setStage('recipe');
-                    record('skill', c.label);
-                  }}
-                >
-                  {c.emoji} {c.label}
-                </button>
-              ))}
-            </div>
-          </>
+        {/* 설명 방식 전환 — 기본은 "따라 할 수 있게 자세히" */}
+        {stage === 'recipe' && recipe && (
+          <div className="funnel-chips" style={{ padding: '4px 0' }}>
+            {SKILL_CHIPS.map((c) => (
+              <button
+                key={c.label}
+                className={`funnel-chip ${SKILL_MAP[c.label] === skill ? 'chip-on' : ''}`}
+                onClick={() => {
+                  navigator.vibrate?.(10);
+                  setSkill(SKILL_MAP[c.label]);
+                  record('skill', c.label);
+                }}
+              >
+                {c.emoji} {c.label}
+              </button>
+            ))}
+          </div>
         )}
 
         {/* 레시피 지급 */}
