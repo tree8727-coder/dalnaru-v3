@@ -29,20 +29,16 @@ interface Msg { role: Role; text: string; typing?: boolean }
 type Stage = 'greeting' | 'gate' | 'flow' | 'loading' | 'name' | 'result';
 
 const STORE_KEY = 'dalnaru_funnel_v3';
+const FONT_KEY = 'dalnaru_font_large';
 
-// MOCK: 실측 아님 — 출시 전 실제 이벤트 피드로 교체
-const TOAST_FEED = [
-  "🔥 방금 전, '제조업 품질관리 25년' 선배님의 이력서가 완성되었습니다.",
-  "🔥 방금 전, '건설 현장소장 30년' 선배님의 이력서가 완성되었습니다.",
-  "🔥 방금 전, '은행 지점장 22년' 선배님의 이력서가 완성되었습니다.",
-];
-// MOCK: "314명"은 실측 아님
+/* 조급함을 파는 문구("방금 전 ○○님 완성")는 쓰지 않는다.
+ * 이 나이대에 필요한 것은 재촉이 아니라 존중과 안심이다. 숫자 과시도 하지 않는다. */
 const GREETING = [
-  '반갑습니다, 대표님! 👏 저는 대표님의 평생 경력을 기업에 바로 낼 수 있는 이력서로 정리해 드리는 달나루입니다.',
-  '이번 주에만 314명의 선배님들이 아래와 같은 이력서를 만들어 가셨습니다. 천천히 살펴보세요.',
+  '안녕하세요, 대표님. 평생 일해오신 경력은 그 자체로 자산입니다.',
+  '저희는 그 경험을 기업이 알아보는 이력서 한 장으로 정리해 드립니다. 아래가 완성 예시입니다 — 천천히 살펴보세요. 서두르실 것 없습니다.',
 ];
 const PROMISE =
-  '대화를 마치면 두 가지를 바로 드립니다.\n① 위 형식의 제출용 이력서 (PDF 저장 가능)\n② 대표님 조건에 맞는 일자리 추천\n\n대부분은 버튼만 누르시면 되고, 이야기를 들려주고 싶은 곳에서만 편하게 쓰시면 됩니다. 답하실 때마다 위쪽 게이지에서 이력서가 채워지는 게 보입니다.\n\n응답 내용은 이름을 뺀 익명 자료로 시니어 일자리·업계 연구에 활용됩니다. 시작하시면 동의하신 것으로 알겠습니다.';
+  '대화를 마치면 두 가지를 드립니다.\n① 위 형식의 제출용 이력서 (PDF 저장 가능)\n② 대표님 조건에 맞는 일자리 안내\n\n2~3분이면 됩니다. 타이핑 없이 버튼만 누르시면 되고, 어려운 질문은 없습니다.\n중간에 쉬어가셔도 응답은 저장되어 있으니 언제든 이어서 하실 수 있습니다.\n\n응답 내용은 이름을 뺀 익명 자료로 시니어 일자리 연구에 활용됩니다. 시작하시면 동의하신 것으로 알겠습니다.';
 
 const LOADING_STEPS = [
   '응답하신 내용을 경력기술서 형식으로 조판 중…',
@@ -79,6 +75,18 @@ export default function EntryFunnel() {
   const [jobResult, setJobResult] = useState<{ matches: JobMatch[]; label: string } | null>(null);
   const [enrichOpen, setEnrichOpen] = useState<string | null>(null);
   const [enrichText, setEnrichText] = useState('');
+  const [fontLarge, setFontLarge] = useState(false);
+
+  // 글자 크기 설정 복원 (노안 대응 — 한 번 키우면 계속 유지)
+  useEffect(() => {
+    try { if (localStorage.getItem(FONT_KEY) === '1') setFontLarge(true); } catch { /* 무시 */ }
+  }, []);
+  const toggleFont = () => {
+    setFontLarge((v) => {
+      try { localStorage.setItem(FONT_KEY, v ? '0' : '1'); } catch { /* 무시 */ }
+      return !v;
+    });
+  };
 
   const session = useRef({ id: newSessionId(), startedAt: 0, steps: [] as FunnelStep[] });
   const committing = useRef(false); // 더블 전송 가드
@@ -324,8 +332,14 @@ export default function EntryFunnel() {
   const targetJob = selectedJob ? matches.find((m) => m.job.id === selectedJob)?.job ?? null : null;
 
   return (
-    <div className="funnel-shell">
-      <ToastNudge />
+    <div className={`funnel-shell ${fontLarge ? 'font-large' : ''}`}>
+      {/* 신뢰 스트립: 재촉 대신 안심. 권위 단서(연구실)와 익명 보관을 조용히 알린다 */}
+      <div className="trust-strip">
+        <span>서강대 연구실에서 시작한 시니어 경력 서비스 · 응답은 이름 없이 보관됩니다</span>
+        <button className="font-toggle" onClick={toggleFont} aria-label="글자 크기 바꾸기">
+          {fontLarge ? '가 보통으로' : '가⁺ 글자 크게'}
+        </button>
+      </div>
 
       {(stage === 'flow' || stage === 'loading' || stage === 'name') && (
         <button className="resume-gaugebar" onClick={() => setShowPreview((v) => !v)}>
@@ -480,29 +494,3 @@ function Bubble({ m }: { m: Msg }) {
   );
 }
 
-/** 소셜프루프 토스트 — 문구는 MOCK */
-function ToastNudge() {
-  const [idx, setIdx] = useState(0);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    let alive = true;
-    let t: ReturnType<typeof setTimeout>;
-    const cycle = (i: number) => {
-      if (!alive) return;
-      setIdx(i);
-      setVisible(true);
-      t = setTimeout(() => {
-        if (!alive) return;
-        setVisible(false);
-        t = setTimeout(() => cycle((i + 1) % TOAST_FEED.length), 1400);
-      }, 3600);
-    };
-    t = setTimeout(() => cycle(0), 600);
-    return () => { alive = false; clearTimeout(t); };
-  }, []);
-  return (
-    <div className={`funnel-toast ${visible ? 'show' : ''}`} aria-live="polite">
-      {TOAST_FEED[idx]}
-    </div>
-  );
-}

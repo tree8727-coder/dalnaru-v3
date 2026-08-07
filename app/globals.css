@@ -166,30 +166,43 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
     var(--bg-color);
 }
 
-/* Phase 1: 소셜프루프 토스트 */
-.funnel-toast {
-  position: sticky;
-  top: 8px;
-  z-index: 10;
-  margin: 0 auto 8px;
-  padding: 10px 16px;
-  max-width: 100%;
-  font-size: 0.88rem;
-  color: var(--text-primary);
-  background: rgba(244, 239, 216, 0.08);
-  border: 1px solid var(--border-color);
-  border-radius: 999px;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  opacity: 0;
-  transform: translateY(-6px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-  pointer-events: none;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* 신뢰 스트립 — 재촉하는 토스트 대신 조용한 안심 문구 + 글자 크기 버튼 */
+.trust-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 4px 10px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
 }
-.funnel-toast.show { opacity: 1; transform: translateY(0); }
+.font-toggle {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: rgba(244, 239, 216, 0.1);
+  border: 1px solid var(--border-highlight);
+  border-radius: 999px;
+}
+
+/* 글자 크게 모드 — 노안 대응. 시니어 가이드라인: 본문 16px 이상, 버튼·설명 18~20px */
+.funnel-shell.font-large .funnel-bubble { font-size: 1.3rem; }
+.funnel-shell.font-large .funnel-chip { font-size: 1.2rem; padding: 16px 22px; }
+.funnel-shell.font-large .funnel-input { font-size: 1.22rem; }
+.funnel-shell.font-large .resume-gaugebar { font-size: 1.08rem; }
+.funnel-shell.font-large .trust-strip { font-size: 0.95rem; }
+.funnel-shell.font-large .enrich-title { font-size: 1.15rem; }
+.funnel-shell.font-large .enrich-benefit,
+.funnel-shell.font-large .enrich-ask { font-size: 1rem; }
+.funnel-shell.font-large .job-title { font-size: 1.15rem; }
+.funnel-shell.font-large .job-summary { font-size: 1.05rem; }
+.funnel-shell.font-large .resume-doc p,
+.funnel-shell.font-large .resume-ul li { font-size: 1.08rem; }
+.funnel-shell.font-large .resume-table th,
+.funnel-shell.font-large .resume-table td { font-size: 1.02rem; }
+.funnel-shell.font-large .funnel-privacy { font-size: 0.9rem; }
 
 /* 채팅 영역 */
 .funnel-chat {
@@ -201,12 +214,13 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   padding: 12px 2px;
 }
 
-/* 5070 대상: 글자 크게, 행간 넉넉히 (한글 행간 1.3 이상 — vault 고정값) */
+/* 5070 대상: 글자 크게, 행간 넉넉히 (한글 행간 1.3 이상 — vault 고정값)
+   시니어 가이드라인 기본 16px 이상 → 1.13rem ≈ 18px */
 .funnel-bubble {
   max-width: 85%;
   padding: 14px 18px;
-  font-size: 1.08rem;
-  line-height: 1.6;
+  font-size: 1.13rem;
+  line-height: 1.65;
   border-radius: 20px;
   animation: fadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -251,8 +265,8 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
 
 .funnel-chip {
   flex: 0 0 auto;
-  padding: 13px 18px;
-  font-size: 1.02rem;
+  padding: 14px 20px;
+  font-size: 1.06rem;
   font-weight: 600;
   color: var(--text-primary);
   background: rgba(244, 239, 216, 0.08);
