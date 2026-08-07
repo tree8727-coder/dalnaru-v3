@@ -539,6 +539,12 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
 .landing-card-title { font-size: 1.25rem; font-weight: 800; line-height: 1.4; color: var(--text-primary); }
 .landing-card-desc { font-size: 0.98rem; line-height: 1.5; color: var(--text-secondary); }
 .landing-foot { text-align: center; font-size: 0.85rem; color: var(--text-muted); }
+.landing-main {
+  border-color: var(--primary);
+  background: rgba(254, 228, 162, 0.12);
+  padding: 28px 22px;
+}
+.landing-main .landing-card-title { font-size: 1.45rem; }
 
 /* ===== 계산기 ===== */
 .calc-shell { height: auto; min-height: 100dvh; }
@@ -641,9 +647,25 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   background: var(--primary);
   border-radius: 999px;
 }
-.guide-easy { margin-top: 14px; }
-.guide-needs { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-color); }
-.guide-thanks { margin-top: 16px; font-size: 0.95rem; font-weight: 700; color: var(--primary); }
+.guide-easy-note { margin-top: 12px; font-size: 0.88rem; color: var(--text-secondary); }
+.guide-needs { display: flex; gap: 8px; align-items: center; margin-top: 14px; }
+.guide-needs-input {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  background: rgba(244, 239, 216, 0.06);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+}
+.guide-needs-link {
+  margin-top: 14px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-align: left;
+  padding: 0;
+}
+.guide-thanks { margin-top: 14px; font-size: 0.88rem; font-weight: 700; color: var(--primary); }
 .guide-links { display: flex; gap: 16px; margin-top: 16px; }
 .guide-links a { font-size: 0.92rem; font-weight: 700; color: var(--accent); text-decoration: underline; }
 

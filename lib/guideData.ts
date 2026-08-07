@@ -128,13 +128,3 @@ export const GUIDES: GuideRecipe[] = [
   },
 ];
 
-/** easy 눈높이: 자녀·지인에게 보낼 부탁 메시지 */
-export function helpRequestMessage(g: GuideRecipe): string {
-  return (
-    `[부탁] 컴퓨터에 도구 하나만 설치해 주세요.\n\n` +
-    `"${g.title}" 하려는데 이 도구가 필요하대요.\n\n` +
-    `1) 설치 (명령창에 붙여넣기):\n${g.installCmd}\n\n` +
-    `2) 실행 예시:\n${g.runCmd}\n\n` +
-    `참고: github.com/${g.repo} (달나루 가이드에서 보냄)`
-  );
-}

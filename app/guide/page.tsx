@@ -13,7 +13,7 @@
 import { useRef, useState } from 'react';
 import Link from 'next/link';
 import {
-  GUIDES, SKILL_CHIPS, SKILL_MAP, helpRequestMessage,
+  GUIDES, SKILL_CHIPS, SKILL_MAP,
   type GuideRecipe, type SkillLevel,
 } from '@/lib/guideData';
 import { newSessionId, saveFunnel, type FunnelStep } from '@/lib/funnelCollect';
@@ -25,6 +25,7 @@ export default function GuidePage() {
   const [recipe, setRecipe] = useState<GuideRecipe | null>(null);
   const [skill, setSkill] = useState<SkillLevel>('mid');
   const [needsText, setNeedsText] = useState('');
+  const [needsOpen, setNeedsOpen] = useState(false);
   const [needsSent, setNeedsSent] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const [fontLarge, setFontLarge] = useState(false);
@@ -114,16 +115,9 @@ export default function GuidePage() {
             </ol>
 
             {skill === 'easy' ? (
-              <div className="guide-easy">
-                <p className="enrich-ask">
-                  설치에는 명령어 입력이 필요합니다. 직접 하지 않으셔도 됩니다 —
-                  아래 버튼을 누르면 <strong>자녀분이나 지인에게 보낼 부탁 메시지</strong>가 복사됩니다.
-                  카톡에 붙여넣기만 하세요. 받는 분은 10분이면 해드릴 수 있습니다.
-                </p>
-                <button className="btn-primary" onClick={() => copy(helpRequestMessage(recipe), 'help')}>
-                  {copied === 'help' ? '✓ 복사됐습니다 — 카톡에 붙여넣으세요' : '💬 부탁 메시지 복사하기'}
-                </button>
-              </div>
+              <p className="guide-easy-note">
+                설치에는 명령어 입력이 몇 줄 필요합니다. 위 「설치 정도는 할 수 있어요」를 누르면 그대로 보여드립니다.
+              </p>
             ) : (
               <>
                 <div className="code-block">
@@ -152,27 +146,35 @@ export default function GuidePage() {
               </>
             )}
 
-            {/* 니즈 수집 — 이 페이지의 진짜 수확 */}
+            {/* 니즈 수집 — 작게 접어둔다. 펼친 사람의 의견이 진짜 의견이다 */}
             {!needsSent ? (
-              <div className="guide-needs">
-                <p className="enrich-ask">해보시다 막히거나, 찾는 게 여기 없다면 적어주세요. 다음 가이드에 반영하겠습니다.</p>
-                <textarea
-                  className="funnel-input funnel-textarea enrich-textarea"
-                  rows={2}
-                  value={needsText}
-                  placeholder="예: 스마트스토어 리뷰 관리가 제일 답답해요"
-                  onChange={(e) => setNeedsText(e.target.value)}
-                />
-                <button
-                  className="btn-primary enrich-save"
-                  disabled={!needsText.trim()}
-                  onClick={() => { record('needs', needsText.trim()); setNeedsSent(true); }}
-                >
-                  보내기
+              needsOpen ? (
+                <div className="guide-needs">
+                  <input
+                    className="funnel-input guide-needs-input"
+                    autoFocus
+                    value={needsText}
+                    placeholder="찾는 게 없거나 막히는 점을 한 줄로"
+                    onChange={(e) => setNeedsText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && needsText.trim()) { record('needs', needsText.trim()); setNeedsSent(true); }
+                    }}
+                  />
+                  <button
+                    className="code-copy"
+                    disabled={!needsText.trim()}
+                    onClick={() => { record('needs', needsText.trim()); setNeedsSent(true); }}
+                  >
+                    보내기
+                  </button>
+                </div>
+              ) : (
+                <button className="guide-needs-link" onClick={() => setNeedsOpen(true)}>
+                  찾는 게 없나요? 한 줄 남기기
                 </button>
-              </div>
+              )
             ) : (
-              <p className="guide-thanks">✓ 잘 받았습니다. 숙제로 삼겠습니다.</p>
+              <p className="guide-thanks">✓ 잘 받았습니다.</p>
             )}
 
             <div className="guide-links">
