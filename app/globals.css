@@ -182,6 +182,27 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   color: var(--primary);
 }
 .frontdesk-chip { width: 100%; text-align: left; font-size: 1.1rem; padding: 16px 20px; }
+.gift-link { display: inline-block; margin-top: 8px; color: var(--accent); text-decoration: underline; font-weight: 600; }
+.gift-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(244, 239, 216, 0.06);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+}
+.gift-preview {
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: rgba(244, 239, 216, 0.07);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 14px;
+  margin: 8px 0 12px;
+  word-break: break-all;
+}
 .font-toggle {
   flex: 0 0 auto;
   padding: 8px 14px;
@@ -805,16 +826,48 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   margin-top: 4px;
 }
 
-/* ===== 인쇄(PDF): 결과 이력서만 A4 흰 종이에 조판 ===== */
+/* ===== 회고 카드 (가족 선물용 — 감성 네이비+골드) ===== */
+.memoir-card {
+  background: linear-gradient(165deg, #22306b 0%, var(--bg-color) 75%);
+  border: 1px solid rgba(254, 228, 162, 0.5);
+  border-radius: 18px;
+  padding: 28px 24px;
+  margin: 10px 0;
+  text-align: center;
+  animation: fadeUp 0.5s ease;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+.memoir-eyebrow { font-size: 0.8rem; letter-spacing: 0.3em; color: var(--primary); font-weight: 700; }
+.memoir-title { font-size: 1.7rem; font-weight: 800; line-height: 1.35; color: var(--text-primary); margin-top: 10px; }
+.memoir-headline { font-size: 1rem; color: var(--text-secondary); margin-top: 6px; }
+.memoir-body { margin: 18px 0; padding: 14px 0; border-top: 1px solid rgba(254,228,162,0.3); border-bottom: 1px solid rgba(254,228,162,0.3); }
+.memoir-body p { font-size: 1rem; line-height: 1.7; color: var(--text-primary); margin: 6px 0; }
+.memoir-quote { font-style: italic; color: var(--sub, #D5D0BC); }
+.memoir-lesson span { display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px; }
+.memoir-lesson strong { font-size: 1.15rem; line-height: 1.5; color: var(--primary); }
+.memoir-closing { margin-top: 16px; font-size: 0.95rem; color: var(--text-secondary); }
+.memoir-brand { margin-top: 12px; font-size: 0.75rem; letter-spacing: 0.15em; font-weight: 700; color: var(--primary); }
+
+/* ===== 인쇄(PDF): 기본은 이력서, body.print-memoir면 회고 카드 ===== */
 @media print {
   body * { visibility: hidden; }
-  .funnel-chat > .resume-doc, .funnel-chat > .resume-doc * { visibility: visible; }
-  .funnel-chat > .resume-doc {
+  body:not(.print-memoir) .funnel-chat > .resume-doc,
+  body:not(.print-memoir) .funnel-chat > .resume-doc * { visibility: visible; }
+  body:not(.print-memoir) .funnel-chat > .resume-doc {
     position: absolute;
     inset: 0;
     margin: 12mm 14mm;
     border-radius: 0;
     box-shadow: none;
+    animation: none;
+  }
+  body.print-memoir .memoir-card,
+  body.print-memoir .memoir-card * { visibility: visible; }
+  body.print-memoir .memoir-card {
+    position: absolute;
+    inset: 0;
+    margin: 20mm 16mm;
     animation: none;
   }
   @page { size: A4 portrait; margin: 0; }

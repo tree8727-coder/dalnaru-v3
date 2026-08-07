@@ -408,6 +408,34 @@ export function buildResume(a: Answers): Resume {
   };
 }
 
+/* ---------- 가족 공유용 회고 카드 ----------
+ * 같은 대화에서 두 번째 출구: 기업엔 이력서, 가족엔 회고.
+ * 근거: 0806 회의 참고문헌 5 — "수익 이상으로 본인 지식이 쓰인다는 효능감.
+ * 자서전·회고록 기반이 트래픽 유입의 핵심" */
+export interface Memoir {
+  title: string;       // ○○년, 하나의 길
+  headline: string;
+  crisis: string;      // 고비와 극복
+  proud: string;       // 뿌듯했던 순간
+  story: string;       // 본인 육성 일화
+  lesson: string;      // 후배에게 남기는 한 문장
+  closing: string;
+}
+
+export function buildMemoir(a: Answers): Memoir {
+  return {
+    title: `${a.years ?? ''}, 하나의 길`,
+    headline: [a.field, a.role].filter(Boolean).join('의 ') + (a.name ? ` — ${a.name}` : ''),
+    crisis: a.hardMoment && a.overcome
+      ? `${HARD_PHRASE[a.hardMoment] ?? a.hardMoment} 앞에서도 ${OVERCOME_PHRASE[a.overcome] ?? ''} 버텨냈습니다.`
+      : '',
+    proud: a.proudMoment ? `가장 뿌듯했던 순간은 ${a.proudMoment.replace(/때$/, '때였습니다')}.` : '',
+    story: a.storyAchv ?? '',
+    lesson: a.tacit ?? '',
+    closing: '이 길을 걸어온 당신께, 수고하셨습니다.',
+  };
+}
+
 /* 이력서 완성도(%) — 게이지용 */
 export function resumeProgress(a: Answers): number {
   const keys: (keyof Answers)[] = ['field', 'years', 'role', 'orgSize', 'duty1', 'achv', 'achvNum', 'hardMoment', 'overcome', 'proudMoment', 'tacit', 'style', 'cert', 'workType', 'goal'];

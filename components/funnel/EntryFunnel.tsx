@@ -17,9 +17,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ResumeDoc from './ResumeDoc';
 import JobMatches from './JobMatches';
+import MemoirCard from './MemoirCard';
 import {
   FLOW, ENRICH_STEPS, REWARD_BY_KEY, ACK_BY_KEY, EDU_CHIPS,
-  buildResume, resumeProgress, SAMPLE_ANSWERS,
+  buildResume, buildMemoir, resumeProgress, SAMPLE_ANSWERS,
   type Answers, type Chip,
 } from '@/lib/funnelData';
 import { matchJobs, matchWorknet, type JobMatch, type WorknetJob } from '@/lib/jobMatch';
@@ -78,6 +79,14 @@ export default function EntryFunnel() {
   const [enrichOpen, setEnrichOpen] = useState<string | null>(null);
   const [enrichText, setEnrichText] = useState('');
   const [fontLarge, setFontLarge] = useState(false);
+  const [showMemoir, setShowMemoir] = useState(false);
+
+  // 회고 카드 인쇄: body 클래스로 인쇄 대상을 전환
+  const printMemoir = () => {
+    document.body.classList.add('print-memoir');
+    window.print();
+    document.body.classList.remove('print-memoir');
+  };
 
   // 글자 크기 설정 복원 (노안 대응 — 한 번 키우면 계속 유지)
   useEffect(() => {
@@ -91,6 +100,7 @@ export default function EntryFunnel() {
   };
 
   const session = useRef({ id: newSessionId(), startedAt: 0, steps: [] as FunnelStep[] });
+  const gift = useRef<{ to?: string; from?: string; field?: string } | null>(null); // /gift 링크로 온 경우
   const committing = useRef(false); // 더블 전송 가드
   const leaving = useRef(false);    // "처음부터 다시"는 확인창 없이
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -138,9 +148,27 @@ export default function EntryFunnel() {
     later(tick, 16);
   }, [later]);
 
-  // 시작: 저장된 진행분이 있으면 이어하기 제안, 없으면 인사
+  // 시작: 선물 링크 > 이어하기 > 일반 인사
   useEffect(() => {
     session.current.startedAt = Date.now();
+    try {
+      const g = new URLSearchParams(window.location.search).get('g');
+      if (g) gift.current = JSON.parse(decodeURIComponent(escape(atob(g))));
+    } catch { gift.current = null; }
+    if (gift.current?.from) {
+      const gf = gift.current;
+      record('gift-opened', `${gf.to ?? ''}/${gf.field ?? '분야미상'}`);
+      later(() => botSay(
+        `${gf.to ?? '어르신'}, 안녕하세요! ${gf.from}님이 ${gf.to ?? '어르신'}를 위해 준비한 선물입니다. 평생 일해오신 경력은 그 자체로 자산이에요 — 저희가 그걸 기업이 알아보는 이력서 한 장으로 정리해 드릴게요.`,
+        () => later(() => botSay(GREETING[1], () =>
+          later(() => {
+            setShowTeaser(true);
+            later(() => botSay(PROMISE, () => { setStage('gate'); setChipsEnabled(true); }), 1200);
+          }, 300),
+        ), 350),
+      ), 600);
+      return;
+    }
     const saved = loadSaved();
     if (saved) {
       setResumeOffer(saved);
@@ -212,7 +240,14 @@ export default function EntryFunnel() {
       setMessages((m) => [...m, { role: 'user', text: label }]);
       record('consent', '시작하기 = 익명 활용 동의 문구 표시 후 동의');
       setStage('flow');
-      askStep(0, answers);
+      // 선물 링크에 분야가 있으면 첫 질문을 건너뛴다 (자녀가 미리 채워둠)
+      if (gift.current?.field) {
+        const pre: Answers = { field: gift.current.field };
+        setAnswers(pre);
+        botSay(`${gift.current.from}님께 들으니 ${gift.current.field} 분야에서 일해오셨다고요.`, () => askStep(1, pre));
+      } else {
+        askStep(0, answers);
+      }
       return;
     }
 
@@ -409,6 +444,22 @@ export default function EntryFunnel() {
                 📄 {targetJob ? '이 공고 맞춤 이력서' : '이력서'} PDF로 저장하기
               </button>
             </div>
+            {/* 회고 카드 — 같은 대화의 두 번째 출구 (가족 공유용, 효능감) */}
+            <div className="funnel-actions" style={{ marginTop: 4 }}>
+              <button className="funnel-chip frontdesk-chip" onClick={() => setShowMemoir((v) => !v)}>
+                👨‍👩‍👧 {showMemoir ? '회고 카드 접기' : '가족에게 남기는 회고 카드 보기'}
+              </button>
+            </div>
+            {showMemoir && (
+              <>
+                <MemoirCard memoir={buildMemoir(answers)} />
+                <div className="funnel-actions">
+                  <button className="btn-primary" onClick={printMemoir}>💌 회고 카드 PDF로 저장하기</button>
+                </div>
+                <p className="funnel-privacy">가족 단톡에 보내보세요 — 자녀분들이 제일 좋아하는 선물입니다.</p>
+              </>
+            )}
+
             {/* 지급 후 업그레이드 — 자유 서술은 보상을 받은 뒤에만 (이탈 방지 설계) */}
             {ENRICH_STEPS.some((s) => !answers[s.key]) && (
               <div className="enrich-wrap">

@@ -117,7 +117,11 @@ export default function FrontDesk() {
         ))}
       </div>
 
-      <p className="landing-foot">응답은 이름 없이 보관됩니다 · 무료입니다</p>
+      <p className="landing-foot">
+        응답은 이름 없이 보관됩니다 · 무료입니다
+        <br />
+        <a href="/gift" className="gift-link">👧 자녀분이신가요? — 부모님께 이력서 선물하기</a>
+      </p>
     </div>
   );
 }

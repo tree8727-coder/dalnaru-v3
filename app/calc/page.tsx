@@ -8,7 +8,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { simulate, LIFE_EXPECTANCY, PENSION_START_AGE } from '@/lib/pension';
+import { simulate, hoursPerWeekToCover, LIFE_EXPECTANCY, PENSION_START_AGE, MIN_WAGE } from '@/lib/pension';
 
 interface Field {
   key: 'age' | 'assets' | 'pension' | 'spend';
@@ -86,6 +86,13 @@ export default function CalcPage() {
                 계획하신 {horizon}세까지 <strong>{horizon - r.depletionAge}년</strong>이 비어 있습니다.
                 65세 시점 월 <strong>{fmt(r.monthlyGapAt65)}만원</strong>이 부족합니다.
               </div>
+              {r.monthlyGapAt65 > 0 && (
+                <div className="calc-verdict-sub calc-hope">
+                  그런데 — 그 부족액, <strong>주 {hoursPerWeekToCover(r.monthlyGapAt65)}시간</strong> 일하면
+                  채워집니다 (2026년 최저시급 {MIN_WAGE.toLocaleString()}원 기준).
+                  절망할 숫자가 아니라 계획할 숫자입니다.
+                </div>
+              )}
             </>
           ) : (
             <div className="calc-verdict ok">
@@ -121,8 +128,8 @@ export default function CalcPage() {
 
         <p className="calc-source">
           가정: 물가 연 2%(한국은행 물가안정목표) · 국민연금 {PENSION_START_AGE}세 수령 ·
-          기대수명 {LIFE_EXPECTANCY}세(통계청 2024년 생명표, 2026-08 확인).
-          단순 참고용 계산이며 금융 자문이 아닙니다.
+          기대수명 {LIFE_EXPECTANCY}세(통계청 2024년 생명표) · 최저시급 {MIN_WAGE.toLocaleString()}원(고용노동부
+          2026년 고시). 모두 2026-08 확인. 단순 참고용 계산이며 금융 자문이 아닙니다.
         </p>
       </div>
     </div>

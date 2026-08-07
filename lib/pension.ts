@@ -11,6 +11,14 @@
 export const LIFE_EXPECTANCY = 83.7;
 export const INFLATION = 0.02;
 export const PENSION_START_AGE = 65;
+/** 2026년 적용 최저임금 시급 (고용노동부 고시, 2026-08-08 확인) */
+export const MIN_WAGE = 10320;
+
+/** 월 부족액(만원) → 주 몇 시간 일하면 채워지는가 (최저시급 기준, 월 4.345주) */
+export function hoursPerWeekToCover(monthlyGapManwon: number): number {
+  if (monthlyGapManwon <= 0) return 0;
+  return Math.ceil((monthlyGapManwon * 10000) / MIN_WAGE / 4.345);
+}
 
 export interface SimInput {
   age: number;          // 현재 나이
