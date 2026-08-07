@@ -105,6 +105,8 @@ export default function GuidePage() {
               <div>
                 <div className="guide-title">{recipe.title}</div>
                 <div className="guide-oneliner">{recipe.oneLiner}</div>
+                {/* v5의 랭킹 아이디어 — 포디엄 대신 실측 배지로 (선택지를 다시 늘리지 않기 위해) */}
+                <div className="guide-stars">⭐ 전 세계 개발자 추천 {recipe.stars} (GitHub) · MS 검증</div>
               </div>
             </div>
 
@@ -178,8 +180,9 @@ export default function GuidePage() {
             )}
 
             <div className="guide-links">
-              <a href="/tools.html" target="_blank" rel="noreferrer">🧰 도구 전체 보기</a>
-              <Link href="/funnel">📄 3분 이력서 만들기</Link>
+              <a href="/tools.html" target="_blank" rel="noreferrer">🏆 전체 랭킹 보기</a>
+              <a href="/playbook.html" target="_blank" rel="noreferrer">📖 원리 가이드북</a>
+              <Link href="/funnel">📄 3분 이력서</Link>
             </div>
           </div>
         )}

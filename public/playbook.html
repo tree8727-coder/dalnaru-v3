@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1인 창업 AI 자동화 풀스택 가이드북</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --text-color: #334155;
+            --primary-color: #3b82f6;
+            --secondary-color: #10b981;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+        }
+        body {
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        h2 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-top: 50px;
+        }
+        h3 {
+            font-size: 1.3rem;
+            color: #475569;
+            margin-top: 30px;
+        }
+        p, li { font-size: 1.1rem; }
+        ul { margin-bottom: 20px; }
+        li { margin-bottom: 8px; }
+        code {
+            background-color: #f1f5f9;
+            color: #ef4444;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: Consolas, monospace;
+            font-size: 0.95em;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-family: Consolas, monospace;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        .alert {
+            background-color: #eff6ff;
+            border-left: 5px solid var(--primary-color);
+            padding: 15px 20px;
+            border-radius: 0 10px 10px 0;
+            margin: 20px 0;
+        }
+        .badge {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 1인 창업 AI 자동화 풀스택 가이드북</h1>
+        <p style="text-align: center; color: #64748b; font-size: 1.2rem; margin-bottom: 50px;">혼자서 기획, 디자인, DB 구축까지 100% 자동화하는 깃허브 마스터 가이드</p>
+        
+        <h2>1. 💡 왜 이 도구들의 조합이 강력한가?</h2>
+        <p>보통 1인 창업자들은 무거운 상용 프로그램(예: 포토샵, 엑셀)에 의존합니다. 하지만 이들은 무겁고, 느리며, '자동화(스크립팅)'가 매우 어렵습니다. 우리가 구축한 조합은 <strong>"각 분야의 가장 가볍고 빠른 오픈소스(명령어 도구)들을 레고 블록처럼 조립하는 방식"</strong>입니다.</p>
+        <ul>
+            <li><strong>텍스트 처리 및 기획</strong>: AI 에이전트(LLM)가 담당하여 사람의 두뇌 역할을 합니다.</li>
+            <li><strong>디자인(카드뉴스)</strong>: 파이썬의 <code>Pillow</code> 라이브러리가 담당하여, 수백 장의 이미지를 1초 만에 찍어냅니다 (포토샵 대체).</li>
+            <li><strong>데이터 보관(DB)</strong>: 엑셀 파일이 깨지거나 엉키는 것을 방지하기 위해 가벼운 <code>SQLite</code>와 <code>sqlite-utils</code>를 사용하여 안전한 영구 보관소 역할을 합니다.</li>
+        </ul>
+        <div class="alert">
+            <strong>핵심 파이프라인:</strong> "기획(AI) ➡️ 제작(Python) ➡️ 저장(SQLite)" 이라는 과정이 코드 한 줄로 실행되는 엄청난 효율을 냅니다.
+        </div>
+
+        <h2>2. 📥 사용된 핵심 깃허브 도구들의 출처와 설치법</h2>
+        
+        <h3>① 터미널 생산성 도구 모음 <span class="badge">Rust 기반</span></h3>
+        <p>기존의 느린 윈도우 기본 명령어들을 대체하기 위해 깃허브에서 스타를 수만 개씩 받은 초고속 도구들입니다.</p>
+        <ul>
+            <li><code>ripgrep</code>: 텍스트 검색 1위 (BurntSushi)</li>
+            <li><code>eza</code>: 디렉토리 목록 예쁘게 보기 (eza-community)</li>
+            <li><code>zoxide</code>: 스마트한 폴더 이동 (ajeetdsouza)</li>
+        </ul>
+        
+        <h3>② 초고속 파이썬 패키지 매니저: uv <span class="badge">Astral</span></h3>
+        <p>파이썬 환경 설정은 매우 복잡합니다. 하지만 <code>uv</code>를 사용하면 가상환경을 일일이 만들지 않아도, 스크립트 실행 시 필요한 라이브러리(Pillow, pandas 등)를 0.1초 만에 자동으로 다운로드하고 실행해 줍니다.</p>
+        
+        <h3>③ 깃허브 인기 DB 도구: sqlite-utils <span class="badge">Simon Willison</span></h3>
+        <p>복잡한 SQL 쿼리문을 몰라도, 터미널 명령어 한 줄로 DB에 데이터를 넣고, 검색하고, 엑셀이나 JSON으로 뺄 수 있게 해주는 마법 같은 도구입니다.</p>
+
+        <h2>3. ⚙️ 전체 파이프라인 결합 및 사용 방법</h2>
+        <p>실제 <code>startup_automation_db</code> 폴더 안에서 각 단계가 어떻게 맞물려 돌아가는지 설명합니다. 터미널을 열고 아래 명령어들을 따라 해보세요.</p>
+        
+        <h3>Step 1. 기획안 및 에셋 구워내기 (Python 스크립트 실행)</h3>
+        <pre><code># uv가 필요한 파이썬 라이브러리를 임시로 즉시 다운받아 스크립트 실행
+uv run --with pandas --with openpyxl --with Pillow init_db.py</code></pre>
+        <p><strong>동작 결과</strong>: <code>cardnews_output</code> 폴더에 이미지가 렌더링 되고, <code>startup_data.db</code>와 <code>workflow_record.xlsx</code>가 생성(업데이트) 됩니다.</p>
+
+        <h3>Step 2. 로컬 DB 터미널에서 장난감처럼 다루기 (sqlite-utils)</h3>
+        <pre><code># 1. 내 DB에 어떤 테이블들이 있는지 확인하기
+sqlite-utils tables startup_data.db
+
+# 2. 카드뉴스 텍스트가 DB에 잘 들어갔는지 표(table) 형태로 보기
+sqlite-utils rows startup_data.db cardnews_slides -t
+
+# 3. 통째로 JSON 파일로 내보내기
+sqlite-utils rows startup_data.db workflow_records --json > export.json</code></pre>
+
+        <h2>🎯 요약</h2>
+        <p>이 폴더 하나가 대표님의 <strong>'미니 데이터센터'</strong>이자 <strong>'자동화 공장'</strong>입니다. 데이터가 필요할 땐 <code>sqlite-utils</code>로 꺼내보고, 렌더링을 다시 하고 싶을 땐 <code>init_db.py</code>를 살짝 바꿔서 <code>uv run</code>으로 실행시키면 됩니다.</p>
+    </div>
+</body>
+</html>

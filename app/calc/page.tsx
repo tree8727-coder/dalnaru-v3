@@ -113,6 +113,9 @@ export default function CalcPage() {
             <Link href="/funnel" className="btn-primary calc-cta-btn">
               부족분, 일로 채워볼까요? — 3분 이력서 만들기
             </Link>
+            <Link href="/guide" className="guide-needs-link" style={{ display: 'block', textAlign: 'center', marginTop: 10 }}>
+              🏆 부업·자동화 도구 1등 모음 보기
+            </Link>
           </div>
         </div>
 

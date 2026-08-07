@@ -600,6 +600,17 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
 .guide-icon { font-size: 2rem; }
 .guide-title { font-size: 1.25rem; font-weight: 800; line-height: 1.4; color: var(--text-primary); }
 .guide-oneliner { font-size: 0.98rem; line-height: 1.55; color: var(--text-secondary); margin-top: 4px; }
+.guide-stars {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: rgba(254, 228, 162, 0.12);
+  border: 1px solid rgba(254, 228, 162, 0.3);
+  border-radius: 999px;
+}
 .guide-why {
   margin-top: 12px;
   padding: 10px 14px;

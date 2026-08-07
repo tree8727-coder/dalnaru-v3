@@ -21,6 +21,7 @@ export interface GuideRecipe {
   runCmd: string;
   aiPrompt: string;      // 같이 쓰는 AI 프롬프트
   repo: string;
+  stars: string;         // GitHub 별 수 — v5 실측값(2026-08-08). 진짜 사회적 증거
 }
 
 export const SKILL_CHIPS = [
@@ -49,7 +50,7 @@ export const GUIDES: GuideRecipe[] = [
     installCmd: 'npm install -g @mendable/firecrawl-cli\nwinget install jqlang.jq',
     runCmd: "firecrawl scrape https://경쟁사.com | jq '.content'",
     aiPrompt: '아래 긁어온 경쟁사 데이터를 분석해서, 우리가 써먹을 수 있는 빈틈 키워드 5개를 뽑아줘.',
-    repo: 'mendableai/firecrawl',
+    repo: 'mendableai/firecrawl', stars: '16.2만',
   },
   {
     id: 'notes', goalChip: '메모·회의록 정리', icon: '🧠',
@@ -64,7 +65,7 @@ export const GUIDES: GuideRecipe[] = [
     installCmd: 'winget install BurntSushi.ripgrep.MSVC',
     runCmd: "rg '마케팅 타겟' my_notes/",
     aiPrompt: '아래 두서없는 회의 녹취록을 [배경, 목표, 액션아이템] 구조로 정리해줘.',
-    repo: 'BurntSushi/ripgrep',
+    repo: 'BurntSushi/ripgrep', stars: '6.7만',
   },
   {
     id: 'images', goalChip: '사진 대량 작업', icon: '🖼️',
@@ -79,7 +80,7 @@ export const GUIDES: GuideRecipe[] = [
     installCmd: 'winget install sharkdp.fd\nwinget install ImageMagick.ImageMagick',
     runCmd: 'fd -e png -x magick {} -resize 50% {.}.jpg',
     aiPrompt: '현재 폴더의 모든 PNG를 가로 800px JPG로 일괄 변환하는 ImageMagick 명령어를 짜줘.',
-    repo: 'ImageMagick',
+    repo: 'ImageMagick', stars: '4.4만',
   },
   {
     id: 'marketing', goalChip: '홍보물·카드뉴스', icon: '🎯',
@@ -94,7 +95,7 @@ export const GUIDES: GuideRecipe[] = [
     installCmd: 'winget install --id astral-sh.uv',
     runCmd: 'uv run --with Pillow generate_cards.py',
     aiPrompt: '1인 창업가를 위한 마케팅 문구 4장을 짜고, [제목, 본문, 추천배경색] 형식의 텍스트로만 줘.',
-    repo: 'astral-sh/uv',
+    repo: 'astral-sh/uv', stars: '8.8만',
   },
   {
     id: 'finance', goalChip: '장부·돈 정리', icon: '🧾',
@@ -109,7 +110,7 @@ export const GUIDES: GuideRecipe[] = [
     installCmd: 'winget install hledger',
     runCmd: 'hledger -f journal.txt balancesheet',
     aiPrompt: '다음 영수증을 읽고 날짜, 금액, 사용처를 [2026-08-08 * 식대 50000] 형태로 바꿔줘.',
-    repo: 'simonmichael/hledger',
+    repo: 'simonmichael/hledger', stars: '4.6천',
   },
   {
     id: 'dev', goalChip: '개발 환경 갖추기', icon: '⚡',
@@ -124,7 +125,7 @@ export const GUIDES: GuideRecipe[] = [
     installCmd: 'winget install junegunn.fzf\nwinget install ajeetdsouza.zoxide',
     runCmd: 'z 내프로젝트',
     aiPrompt: '(개발 속도를 올려주는 기본 유틸리티 세트입니다)',
-    repo: 'junegunn/fzf',
+    repo: 'junegunn/fzf', stars: '8.2만',
   },
 ];
 

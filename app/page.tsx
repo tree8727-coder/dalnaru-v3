@@ -30,6 +30,12 @@ export default function Home() {
           <span className="landing-card-title">내 은퇴 자금, 몇 살까지 버틸까?</span>
           <span className="landing-card-desc">네 가지만 맞추면 바로 계산됩니다. 1분.</span>
         </Link>
+        {/* 트래픽 유인책 — 검색 수요가 다른 세 번째 문. 메인(이력서)보다 작게 */}
+        <Link href="/guide" className="landing-card">
+          <span className="landing-card-emoji">🏆</span>
+          <span className="landing-card-title">일 잘하는 사람들의 자동화 도구, 분야별 1등만</span>
+          <span className="landing-card-desc">전 세계 추천 수로 검증된 것 하나씩만, 눈높이에 맞춰 알려드립니다.</span>
+        </Link>
       </div>
 
       <p className="landing-foot">응답은 이름 없이 보관됩니다 · 무료입니다</p>
