@@ -442,6 +442,14 @@ export default function EntryFunnel() {
                 ))}
               </div>
             )}
+            {/* 창업 준비를 고른 분에게만 — 도구함은 미끼(전면)가 아니라 보상(후면)으로 */}
+            {answers.goal === '창업 준비' && (
+              <a className="landing-card" href="/tools.html" target="_blank" rel="noreferrer" style={{ marginTop: 14 }}>
+                <span className="landing-card-emoji">🧰</span>
+                <span className="landing-card-title">창업 준비하신다니 — 도구함을 드립니다</span>
+                <span className="landing-card-desc">1인 창업에 쓰는 도구와 단계별 레시피 모음입니다. 무료입니다.</span>
+              </a>
+            )}
             <JobMatches matches={matches} selectedId={selectedJob} onSelect={setSelectedJob} sourceLabel={jobResult?.label ?? '공고 불러오는 중…'} />
             <button className="funnel-restart" onClick={restart}>처음부터 다시</button>
             <p className="funnel-privacy">
