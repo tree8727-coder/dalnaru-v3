@@ -516,10 +516,17 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
 .job-link { font-size: 0.82rem; font-weight: 600; color: var(--accent); text-decoration: underline; }
 
 /* ===== 랜딩 ===== */
-.landing-shell { justify-content: center; gap: 28px; }
+/* 문이 늘면 화면을 넘친다 — 고정 높이 대신 스크롤 (4문에서 실제로 잘렸음) */
+.landing-shell {
+  justify-content: flex-start;
+  gap: 22px;
+  height: auto;
+  min-height: 100dvh;
+  padding-top: 36px;
+}
 .landing-hero { text-align: center; }
 .landing-brand { font-size: 1rem; font-weight: 800; letter-spacing: 0.2em; color: var(--primary); margin-bottom: 14px; }
-.landing-title { font-size: 2.1rem; font-weight: 800; line-height: 1.35; color: var(--text-primary); }
+.landing-title { font-size: 1.9rem; font-weight: 800; line-height: 1.35; color: var(--text-primary); }
 .landing-sub { font-size: 1.02rem; color: var(--text-secondary); margin-top: 12px; }
 .landing-cards { display: flex; flex-direction: column; gap: 12px; }
 .landing-card {
