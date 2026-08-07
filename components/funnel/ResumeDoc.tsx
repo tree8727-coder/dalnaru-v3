@@ -26,7 +26,8 @@ export default function ResumeDoc({
     <div className={`resume-doc ${preview ? 'preview' : ''}`}>
       {targetJob && (
         <div className="resume-target">
-          지원 직무 — {targetJob.title} <span className="resume-target-co">({targetJob.company} · 예시 공고)</span>
+          지원 직무 — {targetJob.title}{' '}
+          <span className="resume-target-co">({targetJob.company}{targetJob.url ? '' : ' · 예시 공고'})</span>
         </div>
       )}
 
@@ -107,7 +108,7 @@ export default function ResumeDoc({
             ? `${resume.tacitQuote ? '이 한 문장이 제 일의 기준이었습니다. ' : ''}${resume.summary}`
             : <Blank />}
         </p>
-        {targetJob && (
+        {targetJob && targetJob.requirements.length > 0 && (
           <p className="resume-apply">
             위 경력은 본 직무의 핵심 요건({targetJob.requirements.slice(0, 2).join(', ')})과 직접 맞닿아 있습니다.
           </p>

@@ -14,12 +14,34 @@ export interface JobPosting {
   id: string;
   category: string;   // 실제 분포상의 직종
   title: string;
-  company: string;    // 익명화된 예시
+  company: string;    // 예시 풀은 익명, 워크넷은 실명(실데이터)
   workTypes: string[];
   fields: string[];   // 잘 맞는 출신 분야
   seniorRoles: boolean; // 관리자 출신 우대 여부
   summary: string;
   requirements: string[]; // 맞춤 이력서에서 강조할 요구 역량
+  url?: string;       // 워크넷 실공고 링크
+}
+
+/* /api/jobs가 돌려주는 워크넷 실공고 형태 */
+export interface WorknetJob {
+  id: string; title: string; company: string; category: string;
+  region: string; salary: string; career: string; url: string; closeDt: string;
+}
+
+/** 워크넷 실공고 → 카드. 점수는 분야 키워드 검색 결과라는 사실에 기반한 보수적 값 */
+export function matchWorknet(jobs: WorknetJob[], a: Answers, top = 3): JobMatch[] {
+  const longCareer = ['20년~30년', '30년 이상 평생'].includes(a.years ?? '');
+  return jobs.slice(0, 10).map((j) => ({
+    job: {
+      id: j.id, category: j.category || '워크넷', title: j.title, company: j.company,
+      workTypes: [], fields: [], seniorRoles: false,
+      summary: [j.region, j.salary, j.career, j.closeDt && `마감 ${j.closeDt}`].filter(Boolean).join(' · '),
+      requirements: [], url: j.url || undefined,
+    },
+    score: Math.min(90, 68 + (longCareer ? 7 : 0)),
+    reasons: [`${a.field ?? ''} 키워드로 검색된 실제 공고`].filter(Boolean),
+  })).slice(0, top);
 }
 
 export const JOB_POOL: JobPosting[] = [

@@ -9,16 +9,18 @@ export default function JobMatches({
   matches,
   selectedId,
   onSelect,
+  sourceLabel,
 }: {
   matches: JobMatch[];
   selectedId: string | null;
   onSelect: (id: string | null) => void;
+  sourceLabel: string;
 }) {
   if (!matches.length) return null;
   return (
     <div className="jobs-wrap">
       <div className="jobs-head">
-        대표님 경력과 맞는 일자리 <span className="jobs-note">예시 공고 — 실제 공고 연동 준비 중</span>
+        대표님 경력과 맞는 일자리 <span className="jobs-note">{sourceLabel}</span>
       </div>
       {matches.map(({ job, score, reasons }) => (
         <button
@@ -39,6 +41,11 @@ export default function JobMatches({
           )}
           <div className="job-cta">
             {selectedId === job.id ? '▲ 기본 이력서로 돌아가기' : '▼ 이 공고에 맞춘 이력서 보기'}
+            {job.url && (
+              <a className="job-link" href={job.url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
+                워크넷에서 공고 보기 ↗
+              </a>
+            )}
           </div>
         </button>
       ))}

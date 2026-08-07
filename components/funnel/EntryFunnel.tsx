@@ -18,10 +18,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import ResumeDoc from './ResumeDoc';
 import JobMatches from './JobMatches';
 import {
-  FLOW, REWARD_BY_KEY, buildResume, resumeProgress, SAMPLE_ANSWERS,
+  FLOW, ENRICH_STEPS, REWARD_BY_KEY, buildResume, resumeProgress, SAMPLE_ANSWERS,
   type Answers, type Chip,
 } from '@/lib/funnelData';
-import { matchJobs, JOB_POOL } from '@/lib/jobMatch';
+import { matchJobs, matchWorknet, type JobMatch, type WorknetJob } from '@/lib/jobMatch';
 import { newSessionId, saveFunnel, type FunnelStep } from '@/lib/funnelCollect';
 
 type Role = 'bot' | 'user';
@@ -76,6 +76,9 @@ export default function EntryFunnel() {
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
   const [reward, setReward] = useState<string | null>(null);
   const [resumeOffer, setResumeOffer] = useState<Saved | null>(null);
+  const [jobResult, setJobResult] = useState<{ matches: JobMatch[]; label: string } | null>(null);
+  const [enrichOpen, setEnrichOpen] = useState<string | null>(null);
+  const [enrichText, setEnrichText] = useState('');
 
   const session = useRef({ id: newSessionId(), startedAt: 0, steps: [] as FunnelStep[] });
   const committing = useRef(false); // 더블 전송 가드
@@ -280,11 +283,45 @@ export default function EntryFunnel() {
     window.location.reload();
   };
 
+  // 결과 단계: 워크넷 실공고 시도 → 없으면 예시 공고
+  useEffect(() => {
+    if (stage !== 'result') return;
+    let alive = true;
+    fetch(`/api/jobs?keyword=${encodeURIComponent(answers.field ?? '')}`)
+      .then((r) => r.json())
+      .then((d: { source: string; jobs?: WorknetJob[] }) => {
+        if (!alive) return;
+        if (d.source === 'worknet' && d.jobs?.length) {
+          setJobResult({ matches: matchWorknet(d.jobs, answers), label: '워크넷 실시간 공고 · 출처 고용24' });
+        } else {
+          setJobResult({ matches: matchJobs(answers), label: '예시 공고 — 실제 공고 연동 준비 중' });
+        }
+      })
+      .catch(() => alive && setJobResult({ matches: matchJobs(answers), label: '예시 공고 — 실제 공고 연동 준비 중' }));
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage]);
+
+  // 지급 후 업그레이드: 답하면 이력서가 눈앞에서 좋아진다
+  const submitEnrich = (key: string) => {
+    const text = enrichText.trim();
+    if (!text) return;
+    setAnswers((a) => ({ ...a, [key]: text }));
+    record(key, text);
+    setEnrichOpen(null);
+    setEnrichText('');
+    const slot = REWARD_BY_KEY[key];
+    if (slot) {
+      setReward(`✓ 「${slot}」에 반영됐습니다`);
+      later(() => setReward(null), 2000);
+    }
+  };
+
   const progress = stage === 'result' ? 100 : resumeProgress(answers);
   const resume = buildResume(answers);
   const sampleResume = buildResume(SAMPLE_ANSWERS);
-  const matches = stage === 'result' ? matchJobs(answers) : [];
-  const targetJob = selectedJob ? JOB_POOL.find((j) => j.id === selectedJob) ?? null : null;
+  const matches = jobResult?.matches ?? [];
+  const targetJob = selectedJob ? matches.find((m) => m.job.id === selectedJob)?.job ?? null : null;
 
   return (
     <div className="funnel-shell">
@@ -326,13 +363,47 @@ export default function EntryFunnel() {
 
         {stage === 'result' && (
           <>
+            {reward && <div className="enrich-reward">{reward}</div>}
             <ResumeDoc resume={resume} targetJob={targetJob} />
             <div className="funnel-actions">
               <button className="btn-primary" onClick={() => window.print()}>
                 📄 {targetJob ? '이 공고 맞춤 이력서' : '이력서'} PDF로 저장하기
               </button>
             </div>
-            <JobMatches matches={matches} selectedId={selectedJob} onSelect={setSelectedJob} />
+            {/* 지급 후 업그레이드 — 자유 서술은 보상을 받은 뒤에만 (이탈 방지 설계) */}
+            {ENRICH_STEPS.some((s) => !answers[s.key]) && (
+              <div className="enrich-wrap">
+                <div className="jobs-head">이력서를 더 돋보이게 (선택)</div>
+                {ENRICH_STEPS.filter((s) => !answers[s.key]).map((s) => (
+                  <div key={s.key} className={`enrich-card ${enrichOpen === s.key ? 'open' : ''}`}>
+                    <button
+                      className="enrich-toggle"
+                      onClick={() => { setEnrichOpen(enrichOpen === s.key ? null : s.key); setEnrichText(''); }}
+                    >
+                      <span className="enrich-title">✏️ {s.title}</span>
+                      <span className="enrich-benefit">{s.benefit}</span>
+                    </button>
+                    {enrichOpen === s.key && (
+                      <div className="enrich-body">
+                        <p className="enrich-ask">{s.ask}</p>
+                        <textarea
+                          className="funnel-input funnel-textarea enrich-textarea"
+                          autoFocus
+                          rows={3}
+                          value={enrichText}
+                          placeholder="말씀하시듯 편하게 쓰시면 됩니다"
+                          onChange={(e) => setEnrichText(e.target.value)}
+                        />
+                        <button className="btn-primary enrich-save" disabled={!enrichText.trim()} onClick={() => submitEnrich(s.key)}>
+                          이력서에 반영하기
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            <JobMatches matches={matches} selectedId={selectedJob} onSelect={setSelectedJob} sourceLabel={jobResult?.label ?? '공고 불러오는 중…'} />
             <button className="funnel-restart" onClick={restart}>처음부터 다시</button>
             <p className="funnel-privacy">
               응답 내용은 이름을 뺀 익명 자료로 저장되어 시니어 일자리·업계 연구와 서비스 개선에
