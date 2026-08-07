@@ -42,7 +42,7 @@ const GREETING = [
   '이번 주에만 314명의 선배님들이 아래와 같은 이력서를 만들어 가셨습니다. 천천히 살펴보세요.',
 ];
 const PROMISE =
-  '대화를 마치면 두 가지를 바로 드립니다.\n① 위 형식의 제출용 이력서 (PDF 저장 가능)\n② 대표님 조건에 맞는 일자리 추천\n\n타이핑은 없습니다. 버튼만 누르시면 되고, 답하실 때마다 위쪽 게이지에서 이력서가 채워지는 게 보입니다. 준비되시면 시작 버튼을 눌러 주세요.';
+  '대화를 마치면 두 가지를 바로 드립니다.\n① 위 형식의 제출용 이력서 (PDF 저장 가능)\n② 대표님 조건에 맞는 일자리 추천\n\n대부분은 버튼만 누르시면 되고, 이야기를 들려주고 싶은 곳에서만 편하게 쓰시면 됩니다. 답하실 때마다 위쪽 게이지에서 이력서가 채워지는 게 보입니다.\n\n응답 내용은 이름을 뺀 익명 자료로 시니어 일자리·업계 연구에 활용됩니다. 시작하시면 동의하신 것으로 알겠습니다.';
 
 const LOADING_STEPS = [
   '응답하신 내용을 경력기술서 형식으로 조판 중…',
@@ -160,6 +160,7 @@ export default function EntryFunnel() {
     later(() => botSay(FLOW[idx].ask(a), () => {
       committing.current = false;
       setChipsEnabled(true);
+      if (FLOW[idx].input === 'text') setManualMode(true); // 자유 서술 — 글상자 바로 열기
     }), 420);
   };
 
@@ -195,6 +196,7 @@ export default function EntryFunnel() {
     if (stage === 'gate') {
       setChipsEnabled(false);
       setMessages((m) => [...m, { role: 'user', text: label }]);
+      record('consent', '시작하기 = 익명 활용 동의 문구 표시 후 동의');
       setStage('flow');
       askStep(0, answers);
       return;
@@ -333,7 +335,8 @@ export default function EntryFunnel() {
             <JobMatches matches={matches} selectedId={selectedJob} onSelect={setSelectedJob} />
             <button className="funnel-restart" onClick={restart}>처음부터 다시</button>
             <p className="funnel-privacy">
-              선택하신 내용(분야·기간·역할·성과·목표 등)은 서비스 개선을 위해 저장됩니다. 성함은 이력서에만 쓰입니다.
+              응답 내용은 이름을 뺀 익명 자료로 저장되어 시니어 일자리·업계 연구와 서비스 개선에
+              활용됩니다. 성함은 이력서에만 쓰입니다.
             </p>
           </>
         )}
@@ -353,14 +356,25 @@ export default function EntryFunnel() {
       {stage !== 'result' && stage !== 'loading' && stage !== 'greeting' && (
         <div className="funnel-inputbar">
           {manualMode ? (
-            <input
-              className="funnel-input"
-              autoFocus
-              value={inputText}
-              placeholder={stage === 'name' ? '성함을 입력해 주세요' : '편하게 입력해 주세요'}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter' && inputText.trim()) commitAnswer(inputText.trim()); }}
-            />
+            currentStep?.input === 'text' ? (
+              <textarea
+                className="funnel-input funnel-textarea"
+                autoFocus
+                rows={3}
+                value={inputText}
+                placeholder="말씀하시듯 편하게 쓰시면 됩니다"
+                onChange={(e) => setInputText(e.target.value)}
+              />
+            ) : (
+              <input
+                className="funnel-input"
+                autoFocus
+                value={inputText}
+                placeholder={stage === 'name' ? '성함을 입력해 주세요' : '편하게 입력해 주세요'}
+                onChange={(e) => setInputText(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && inputText.trim()) commitAnswer(inputText.trim()); }}
+              />
+            )
           ) : (
             <div className={`funnel-input ${inputText ? '' : 'empty'}`}>
               {inputText || '아래 버튼을 눌러 주세요'}

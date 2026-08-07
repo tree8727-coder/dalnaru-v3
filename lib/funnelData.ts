@@ -14,8 +14,11 @@ export interface AchvOption { chip: string; title: string; bullets: string[] }
 export type Answers = Partial<{
   field: string; years: string; role: string; orgSize: string;
   duty1: string; duty2: string; achv: string; achvNum: string;
+  storyAchv: string;   // 자유 서술 — 성과에 얽힌 이야기 (암묵지 원석)
   hardMoment: string; overcome: string; proudMoment: string;
+  knowhow: string;     // 자유 서술 — 후배에게 전할 요령 (업계 암묵지, B2B 핵심)
   tacit: string; style: string; cert: string; workType: string;
+  needs: string;       // 자유 서술 — 지금 제일 답답한 것 (Unmet Needs, B2B 핵심)
   goal: string; name: string;
 }>;
 
@@ -23,8 +26,9 @@ export type Answers = Partial<{
 export const REWARD_BY_KEY: Record<string, string> = {
   field: '경력 사항', years: '경력 사항', role: '경력 사항', orgSize: '경력 사항',
   duty1: '담당 업무', duty2: '담당 업무', achv: '주요 성과', achvNum: '주요 성과',
-  hardMoment: '주요 경험', overcome: '주요 경험', proudMoment: '주요 경험',
-  tacit: '자기소개', style: '핵심 역량', cert: '자격 사항', workType: '희망 사항', goal: '희망 사항',
+  storyAchv: '주요 경험', hardMoment: '주요 경험', overcome: '주요 경험', proudMoment: '주요 경험',
+  knowhow: '주요 경험', tacit: '자기소개', style: '핵심 역량', cert: '자격 사항',
+  workType: '희망 사항', needs: '서비스 개선 과제', goal: '희망 사항',
 };
 
 /* ---------- 분야별 데이터 ---------- */
@@ -142,6 +146,7 @@ export interface FlowStep {
   chips: (a: Answers) => Chip[];
   sentence: (label: string) => string; // 칩 → 채팅창 자동 타이핑 문장
   skipLabel?: string;                  // 이 라벨이면 건너뜀 (답 저장 안 함)
+  input?: 'text';                      // 자유 서술 질문 — 칩 대신 글상자. 이 답이 데이터의 원석
 }
 
 const toChips = (ls: string[]): Chip[] => ls.map((label) => ({ label }));
@@ -197,8 +202,16 @@ export const FLOW: FlowStep[] = [
     sentence: (l) => `${l} 정도 됩니다.`,
   },
   {
+    key: 'storyAchv',
+    input: 'text',
+    ask: () => '숫자 뒤에는 늘 이야기가 있지요. 그 성과에 얽힌 이야기를 한두 문장만 들려주세요 — 말씀하시듯 편하게 쓰시면 됩니다. 이 이야기가 이력서를 남들과 다르게 만듭니다.',
+    chips: () => [{ emoji: '⏭️', label: '다음에 쓸게요' }],
+    skipLabel: '다음에 쓸게요',
+    sentence: (l) => l,
+  },
+  {
     key: 'hardMoment',
-    ask: () => '숫자는 다 받았습니다. 이제부터는 이력서에 깊이를 넣는 질문입니다 — 그 세월 중 가장 큰 고비는 어떤 종류였나요?',
+    ask: () => '이제부터는 이력서에 깊이를 넣는 질문입니다 — 그 세월 중 가장 큰 고비는 어떤 종류였나요?',
     chips: () => toChips(['사람 문제로 힘들 때', '실적·자금 압박', '사고·품질 문제', '조직 개편·구조조정']),
     sentence: (l) => `${l}이(가) 가장 큰 고비였습니다.`,
   },
@@ -215,8 +228,16 @@ export const FLOW: FlowStep[] = [
     sentence: (l) => `${l}가 제일 뿌듯합니다.`,
   },
   {
+    key: 'knowhow',
+    input: 'text',
+    ask: () => '귀한 이야기네요, 「주요 경험」에 담았습니다. 하나 여쭙고 싶은 게 — 후배가 같은 일을 맡는다면 꼭 알려주고 싶은 요령이나 순서가 있나요? 한 줄이면 충분합니다.',
+    chips: () => [{ emoji: '⏭️', label: '넘어갈게요' }],
+    skipLabel: '넘어갈게요',
+    sentence: (l) => l,
+  },
+  {
     key: 'tacit',
-    ask: () => '좋은 이야기라 이력서 「주요 경험」에 담았습니다. 하나만 더 — 그 세월에서 배운 것을 후배에게 딱 한 문장으로 전한다면요?',
+    ask: () => '그 세월에서 배운 것을 후배에게 딱 한 문장으로 전한다면요?',
     chips: () => TACIT_CHIPS,
     sentence: (l) => `"${l}" — 이 한마디입니다.`,
   },
@@ -237,6 +258,14 @@ export const FLOW: FlowStep[] = [
     ask: () => '앞으로는 어떤 형태로 일하고 싶으세요?',
     chips: () => toChips(WORKTYPE_CHIPS),
     sentence: (l) => `${l}를 생각하고 있습니다.`,
+  },
+  {
+    key: 'needs',
+    input: 'text',
+    ask: () => '거의 끝났습니다. 요즘 다음 일을 준비하시면서 제일 답답하거나 아쉬운 점은 뭔가요? 솔직하게 적어주시면 저희가 풀어야 할 숙제로 삼겠습니다.',
+    chips: () => [{ emoji: '⏭️', label: '딱히 없습니다' }],
+    skipLabel: '딱히 없습니다',
+    sentence: (l) => l,
   },
   {
     key: 'goal',
@@ -297,6 +326,9 @@ export function buildResume(a: Answers): Resume {
   const duties = [a.duty1, a.duty2].filter(Boolean) as string[];
 
   const experiences: string[] = [];
+  if (a.storyAchv) {
+    experiences.push(`현장 일화 — “${a.storyAchv}”`);
+  }
   if (a.hardMoment && a.overcome) {
     experiences.push(
       `위기 대응 — ${HARD_PHRASE[a.hardMoment] ?? a.hardMoment} 앞에서도 ${OVERCOME_PHRASE[a.overcome] ?? ''} 조직을 지켜낸 경험이 있습니다.`,
@@ -304,6 +336,9 @@ export function buildResume(a: Answers): Resume {
   }
   if (a.proudMoment) {
     experiences.push(`성취 — ${PROUD_PHRASE[a.proudMoment] ?? a.proudMoment}.`);
+  }
+  if (a.knowhow) {
+    experiences.push(`전수 노하우 — ${a.knowhow}`);
   }
 
   return {
@@ -347,7 +382,9 @@ export function resumeProgress(a: Answers): number {
 export const SAMPLE_ANSWERS: Answers = {
   field: '건설/건축', years: '30년 이상 평생', role: '현장소장·공장장', orgSize: '수십 명 규모 조직',
   duty1: '공정·일정 관리', duty2: '안전 관리·감독', achv: '무사고 현장 운영', achvNum: '무사고 5년 이상 유지',
+  storyAchv: '장마철에 다들 공기 맞추라고 밀어붙일 때, 하루를 세워서라도 비계부터 다시 잡았습니다. 그 현장이 무사고로 끝났습니다',
   hardMoment: '사고·품질 문제', overcome: '원칙대로 차근차근', proudMoment: '큰 사고를 막아냈을 때',
+  knowhow: '아침에 현장 한 바퀴를 돌 때 어제와 달라진 것부터 찾아라',
   tacit: '현장의 답은 현장에 있다', style: '책임감 하나는 자신 있습니다', cert: '국가기술자격 보유',
   workType: '파트타임', goal: '후배 멘토링', name: '김ㅇㅇ',
 };

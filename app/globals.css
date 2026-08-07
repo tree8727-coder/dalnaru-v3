@@ -288,6 +288,11 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   outline: none;
 }
 .funnel-input.empty { color: var(--text-muted); }
+.funnel-textarea {
+  resize: none;
+  line-height: 1.5;
+  font-family: inherit;
+}
 
 .funnel-send {
   width: 44px;
