@@ -18,7 +18,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import ResumeDoc from './ResumeDoc';
 import JobMatches from './JobMatches';
 import {
-  FLOW, ENRICH_STEPS, REWARD_BY_KEY, buildResume, resumeProgress, SAMPLE_ANSWERS,
+  FLOW, ENRICH_STEPS, REWARD_BY_KEY, ACK_BY_KEY, EDU_CHIPS,
+  buildResume, resumeProgress, SAMPLE_ANSWERS,
   type Answers, type Chip,
 } from '@/lib/funnelData';
 import { matchJobs, matchWorknet, type JobMatch, type WorknetJob } from '@/lib/jobMatch';
@@ -32,10 +33,11 @@ const STORE_KEY = 'dalnaru_funnel_v3';
 const FONT_KEY = 'dalnaru_font_large';
 
 /* 조급함을 파는 문구("방금 전 ○○님 완성")는 쓰지 않는다.
- * 이 나이대에 필요한 것은 재촉이 아니라 존중과 안심이다. 숫자 과시도 하지 않는다. */
+ * 이 나이대에 필요한 것은 재촉이 아니라 존중과 안심이다. 숫자 과시도 하지 않는다.
+ * 신뢰 문구는 화면(UI)에 붙이지 않고 대화 속에서 자연스럽게 — 글씨가 늘면 부담이다. */
 const GREETING = [
-  '안녕하세요, 대표님. 평생 일해오신 경력은 그 자체로 자산입니다.',
-  '저희는 그 경험을 기업이 알아보는 이력서 한 장으로 정리해 드립니다. 아래가 완성 예시입니다 — 천천히 살펴보세요. 서두르실 것 없습니다.',
+  '안녕하세요, 대표님. 서강대 연구실에서 시작한 달나루입니다. 평생 일해오신 경력은 그 자체로 자산입니다.',
+  '저희가 그 경험을 기업이 알아보는 이력서 한 장으로 정리해 드립니다. 아래가 완성 예시입니다 — 천천히 살펴보세요. 서두르실 것 없습니다.',
 ];
 const PROMISE =
   '대화를 마치면 두 가지를 드립니다.\n① 위 형식의 제출용 이력서 (PDF 저장 가능)\n② 대표님 조건에 맞는 일자리 안내\n\n2~3분이면 됩니다. 타이핑 없이 버튼만 누르시면 되고, 어려운 질문은 없습니다.\n중간에 쉬어가셔도 응답은 저장되어 있으니 언제든 이어서 하실 수 있습니다.\n\n응답 내용은 이름을 뺀 익명 자료로 시니어 일자리 연구에 활용됩니다. 시작하시면 동의하신 것으로 알겠습니다.';
@@ -166,9 +168,10 @@ export default function EntryFunnel() {
     ), 700);
   };
 
-  const askStep = (idx: number, a: Answers) => {
+  const askStep = (idx: number, a: Answers, ack?: string) => {
     setStepIdx(idx);
-    later(() => botSay(FLOW[idx].ask(a), () => {
+    const text = ack ? `${ack} ${FLOW[idx].ask(a)}` : FLOW[idx].ask(a);
+    later(() => botSay(text, () => {
       committing.current = false;
       setChipsEnabled(true);
       if (FLOW[idx].input === 'text') setManualMode(true); // 자유 서술 — 글상자 바로 열기
@@ -266,7 +269,9 @@ export default function EntryFunnel() {
     const nextIdx = stepIdx + 1;
     if (nextIdx < FLOW.length) {
       try { localStorage.setItem(STORE_KEY, JSON.stringify({ answers: nextAnswers, stepIdx: nextIdx } satisfies Saved)); } catch { /* 무시 */ }
-      askStep(nextIdx, nextAnswers);
+      // 경청·칭찬 맞장구를 다음 질문 앞에 붙인다 (서비스직 톤)
+      const ack = !skipped ? ACK_BY_KEY[currentStep.key]?.(label) : undefined;
+      askStep(nextIdx, nextAnswers, ack);
     } else {
       startLoading();
     }
@@ -333,11 +338,10 @@ export default function EntryFunnel() {
 
   return (
     <div className={`funnel-shell ${fontLarge ? 'font-large' : ''}`}>
-      {/* 신뢰 스트립: 재촉 대신 안심. 권위 단서(연구실)와 익명 보관을 조용히 알린다 */}
+      {/* 글자 크기 버튼만 — 화면 글씨를 늘리지 않는다. 신뢰 문구는 대화(인사)에 있다 */}
       <div className="trust-strip">
-        <span>서강대 연구실에서 시작한 시니어 경력 서비스 · 응답은 이름 없이 보관됩니다</span>
         <button className="font-toggle" onClick={toggleFont} aria-label="글자 크기 바꾸기">
-          {fontLarge ? '가 보통으로' : '가⁺ 글자 크게'}
+          {fontLarge ? '가 보통 크기' : '가⁺ 글자 크게'}
         </button>
       </div>
 
@@ -378,6 +382,27 @@ export default function EntryFunnel() {
         {stage === 'result' && (
           <>
             {reward && <div className="enrich-reward">{reward}</div>}
+            {/* 공고 지원 양식 완성: 부족한 항목만 짧게 추가로 묻는다 */}
+            {targetJob && !answers.eduLevel && (
+              <div className="enrich-card open">
+                <div className="enrich-body" style={{ paddingTop: 14 }}>
+                  <p className="enrich-ask">이 공고에 지원하는 양식으로 완성하려면 하나만 더 여쭐게요 — 최종 학력이 어떻게 되세요?</p>
+                  <div className="funnel-chips">
+                    {EDU_CHIPS.map((e) => (
+                      <button key={e} className="funnel-chip" onClick={() => {
+                        navigator.vibrate?.(12);
+                        setAnswers((a) => ({ ...a, eduLevel: e }));
+                        record('eduLevel', e);
+                        setReward('✓ 「인적 사항」에 반영됐습니다');
+                        later(() => setReward(null), 2000);
+                      }}>
+                        {e}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
             <ResumeDoc resume={resume} targetJob={targetJob} />
             <div className="funnel-actions">
               <button className="btn-primary" onClick={() => window.print()}>

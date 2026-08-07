@@ -20,7 +20,13 @@ export type Answers = Partial<{
   tacit: string; style: string; cert: string; workType: string;
   needs: string;       // 자유 서술 — 지금 제일 답답한 것 (Unmet Needs, B2B 핵심)
   goal: string; name: string;
+  eduLevel: string;    // 공고 지원 양식 완성 시에만 묻는다 (본 퍼널에서는 안 물음 — 짧게)
 }>;
+
+/* 공고 지원 양식(입사지원서)에 필요한 추가 항목.
+ * 기업별 전용 양식 다운로드는 불가(로그인·저작물 — job-posting-sources 조사).
+ * 대부분의 공고가 표준·자유 양식을 받으므로 표준 입사지원 양식으로 완성한다. */
+export const EDU_CHIPS = ['고등학교 졸업', '전문대 졸업', '대학교 졸업', '대학원 이상'];
 
 /* 답변이 이력서 어느 칸에 들어가는지 — 답할 때마다 "○○에 반영됨 ✓" 보상 표시용 */
 export const REWARD_BY_KEY: Record<string, string> = {
@@ -28,7 +34,7 @@ export const REWARD_BY_KEY: Record<string, string> = {
   duty1: '담당 업무', duty2: '담당 업무', achv: '주요 성과', achvNum: '주요 성과',
   storyAchv: '주요 경험', hardMoment: '주요 경험', overcome: '주요 경험', proudMoment: '주요 경험',
   knowhow: '주요 경험', tacit: '자기소개', style: '핵심 역량', cert: '자격 사항',
-  workType: '희망 사항', needs: '서비스 개선 과제', goal: '희망 사항',
+  workType: '희망 사항', needs: '서비스 개선 과제', goal: '희망 사항', eduLevel: '인적 사항',
 };
 
 /* ---------- 분야별 데이터 ---------- */
@@ -138,6 +144,26 @@ export const ROLE_CHIPS = ['실무 전문가', '팀장·부장', '현장소장·
 export const WORKTYPE_CHIPS = ['풀타임 정규직', '파트타임', '자문·프로젝트 단위', '형태는 상관없음'];
 export const GOAL_CHIPS = ['재취업 준비', '파트타임·자문', '창업 준비', '후배 멘토링'];
 
+/* ---------- 경청·칭찬 맞장구 ----------
+ * 이 서비스는 서비스직이다. 답을 받으면 먼저 들었다는 표시와 칭찬을 하고
+ * 다음 질문으로 넘어간다. 기계적 반복처럼 들리지 않게 답변 내용을 섞는다. */
+export const ACK_BY_KEY: Partial<Record<keyof Answers, (label: string) => string>> = {
+  field: (l) => `${l}이라, 좋은 분야에서 일해오셨네요.`,
+  years: (l) => l.includes('30년') ? '평생을 한길로 걸어오셨네요 — 정말 대단하십니다.' : `${l}이면 결코 짧지 않은 세월입니다.`,
+  role: (l) => `${l}까지 맡으셨다니, 어깨가 무거우셨겠습니다.`,
+  orgSize: () => '그 규모를 이끌어오신 경험, 흔치 않습니다.',
+  duty1: () => '중요한 일을 맡고 계셨네요.',
+  achv: () => '그건 아무나 못 하는 일입니다.',
+  achvNum: () => '숫자가 대표님을 대신 말해주네요. 훌륭합니다.',
+  hardMoment: () => '그 시절, 애 많이 쓰셨습니다.',
+  overcome: () => '그렇게 버텨내신 것이 진짜 실력입니다.',
+  proudMoment: () => '듣기만 해도 뿌듯한 장면이네요.',
+  tacit: () => '좋은 말씀입니다. 이력서에 꼭 담겠습니다.',
+  style: () => '주변의 그 평가가 곧 증명이지요.',
+  cert: () => '든든한 무기네요.',
+  workType: () => '네, 알겠습니다.',
+};
+
 /* ---------- 대화 흐름 (config-driven) ---------- */
 
 export interface FlowStep {
@@ -160,7 +186,7 @@ export const FLOW: FlowStep[] = [
   },
   {
     key: 'years',
-    ask: (a) => `${a.field} — 역시 그 세월이 느껴집니다. 대략 어느 정도 기간 동안 몸담으셨나요?`,
+    ask: () => '대략 어느 정도 기간 동안 몸담으셨나요?',
     chips: () => toChips(YEAR_CHIPS),
     sentence: (l) => `${l} 몸담았습니다.`,
   },
@@ -172,7 +198,7 @@ export const FLOW: FlowStep[] = [
   },
   {
     key: 'orgSize',
-    ask: (a) => `${a.role}이셨군요, 책임이 많으셨겠습니다. 어느 정도 규모의 조직에서 일하셨나요?`,
+    ask: () => '어느 정도 규모의 조직에서 일하셨나요?',
     chips: () => toChips(ORG_CHIPS),
     sentence: (l) => `${l}에서 일했습니다.`,
   },
@@ -221,7 +247,7 @@ export const FLOW: FlowStep[] = [
   },
   {
     key: 'tacit',
-    ask: () => '귀한 이야기네요, 「주요 경험」에 담았습니다. 그 세월에서 배운 것을 후배에게 딱 한 문장으로 전한다면요?',
+    ask: () => '그 세월에서 배운 것을 후배에게 딱 한 문장으로 전한다면요?',
     chips: () => TACIT_CHIPS,
     sentence: (l) => `"${l}" — 이 한마디입니다.`,
   },
@@ -319,6 +345,7 @@ export interface Resume {
   headline: string;       // 30년 건설/건축 현장소장
   goal: string;           // 희망 직무
   workType: string;       // 희망 근무 형태
+  edu: string;            // 최종 학력 (공고 지원 양식에서만 채워짐)
   competencies: string[]; // 핵심역량 (성과 bullets + 스타일)
   career: {
     period: string; org: string; role: string;
@@ -356,6 +383,7 @@ export function buildResume(a: Answers): Resume {
     headline: [a.years, a.field, a.role].filter(Boolean).join(' '),
     goal: a.goal ?? '',
     workType: a.workType ?? '',
+    edu: a.eduLevel ?? '',
     competencies: [
       ...(achvOpt?.bullets ?? []),
       ...(a.style ? [a.style.replace(/라는 말을.*$/, '').replace(/"/g, '')] : []),

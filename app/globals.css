@@ -169,12 +169,8 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
 /* 신뢰 스트립 — 재촉하는 토스트 대신 조용한 안심 문구 + 글자 크기 버튼 */
 .trust-strip {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
+  justify-content: flex-end;
   padding: 8px 4px 10px;
-  font-size: 0.82rem;
-  color: var(--text-secondary);
 }
 .font-toggle {
   flex: 0 0 auto;
@@ -419,6 +415,12 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
 .resume-apply { margin-top: 8px; font-weight: 600; color: #1E295F; }
 .resume-blank { color: #b5b0a0; font-size: 0.88rem; }
 .resume-fillin { color: #8a8a8a; font-size: 0.88rem; }
+.resume-formnote {
+  text-align: center;
+  font-size: 0.78rem !important;
+  color: #999 !important;
+  margin: -8px 0 12px;
+}
 .resume-doctitle {
   text-align: center;
   font-size: 1.15rem;
@@ -512,6 +514,80 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
 .job-reasons li { font-size: 0.85rem; color: var(--primary); margin-bottom: 3px; }
 .job-cta { margin-top: 10px; font-size: 0.88rem; font-weight: 700; color: var(--text-primary); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .job-link { font-size: 0.82rem; font-weight: 600; color: var(--accent); text-decoration: underline; }
+
+/* ===== 랜딩 ===== */
+.landing-shell { justify-content: center; gap: 28px; }
+.landing-hero { text-align: center; }
+.landing-brand { font-size: 1rem; font-weight: 800; letter-spacing: 0.2em; color: var(--primary); margin-bottom: 14px; }
+.landing-title { font-size: 2.1rem; font-weight: 800; line-height: 1.35; color: var(--text-primary); }
+.landing-sub { font-size: 1.02rem; color: var(--text-secondary); margin-top: 12px; }
+.landing-cards { display: flex; flex-direction: column; gap: 12px; }
+.landing-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 22px 20px;
+  border-radius: 20px;
+  background: rgba(244, 239, 216, 0.08);
+  border: 1px solid var(--border-highlight);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.landing-card:active { transform: scale(0.98); border-color: var(--primary); }
+.landing-card-emoji { font-size: 1.6rem; }
+.landing-card-title { font-size: 1.25rem; font-weight: 800; line-height: 1.4; color: var(--text-primary); }
+.landing-card-desc { font-size: 0.98rem; line-height: 1.5; color: var(--text-secondary); }
+.landing-foot { text-align: center; font-size: 0.85rem; color: var(--text-muted); }
+
+/* ===== 계산기 ===== */
+.calc-shell { height: auto; min-height: 100dvh; }
+.calc-scroll { flex: 1; display: flex; flex-direction: column; gap: 14px; padding-bottom: 24px; }
+.calc-title { font-size: 1.5rem; font-weight: 800; line-height: 1.35; color: var(--text-primary); }
+.calc-sub { font-size: 1rem; color: var(--text-secondary); margin-top: -6px; }
+.calc-row {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(244, 239, 216, 0.07);
+  border: 1px solid var(--border-color);
+}
+.calc-label { font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 10px; }
+.calc-stepper { display: flex; align-items: center; gap: 12px; }
+.calc-btn {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--bg-color);
+  background: var(--primary);
+  border-radius: 14px;
+}
+.calc-btn:active { background: var(--primary-hover); }
+.calc-value { flex: 1; text-align: center; font-size: 1.5rem; font-weight: 800; color: var(--text-primary); }
+.calc-unit { font-size: 0.9rem; font-weight: 400; color: var(--text-secondary); margin-left: 4px; }
+.chip-on { background: rgba(254, 228, 162, 0.25); border-color: var(--primary); }
+.calc-result {
+  padding: 18px 16px;
+  border-radius: 18px;
+  background: rgba(244, 239, 216, 0.09);
+  border: 1px solid var(--border-highlight);
+}
+.calc-verdict { font-size: 1.2rem; line-height: 1.5; color: var(--text-primary); }
+.calc-verdict strong { color: var(--primary); }
+.calc-verdict.ok strong { color: var(--primary); }
+.calc-verdict-sub { font-size: 1rem; line-height: 1.55; color: var(--text-secondary); margin-top: 8px; }
+.calc-verdict-sub strong { color: var(--primary); }
+.calc-bars { display: flex; flex-direction: column; gap: 6px; margin-top: 16px; }
+.calc-bar-row { display: flex; align-items: center; gap: 8px; }
+.calc-bar-age { flex: 0 0 44px; font-size: 0.85rem; color: var(--text-secondary); text-align: right; }
+.calc-bar-track { flex: 1; height: 14px; border-radius: 999px; background: rgba(244, 239, 216, 0.1); overflow: hidden; }
+.calc-bar-fill { height: 100%; border-radius: 999px; background: var(--primary); }
+.calc-bar-fill.minus { background: var(--danger); }
+.calc-bar-val { flex: 0 0 92px; font-size: 0.82rem; color: var(--text-secondary); }
+.calc-cta { margin-top: 16px; }
+.calc-cta-btn { text-align: center; }
+.calc-source { font-size: 0.78rem; line-height: 1.6; color: var(--text-muted); }
 
 /* ===== 지급 후 업그레이드 (자유 서술) ===== */
 .enrich-wrap { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }

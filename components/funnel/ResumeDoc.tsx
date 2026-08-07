@@ -31,7 +31,12 @@ export default function ResumeDoc({
         </div>
       )}
 
-      <div className="resume-doctitle">이 력 서</div>
+      <div className="resume-doctitle">{targetJob ? '입 사 지 원 서' : '이 력 서'}</div>
+      {targetJob && (
+        <p className="resume-formnote">
+          표준 입사지원 양식 기준입니다. 기업 전용 양식이 따로 있는 공고는 해당 기업 안내를 따르세요.
+        </p>
+      )}
 
       <header className="resume-header">
         <div>
@@ -53,6 +58,12 @@ export default function ResumeDoc({
               <th>희망 직무</th><td>{targetJob ? targetJob.title : (resume.goal || <Blank />)}</td>
               <th>근무 형태</th><td>{resume.workType || <Blank />}</td>
             </tr>
+            {(targetJob || resume.edu) && (
+              <tr>
+                <th>최종 학력</th>
+                <td colSpan={3}>{resume.edu || <span className="resume-fillin">아래에서 선택해 주세요</span>}</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </section>
