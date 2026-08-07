@@ -1,16 +1,26 @@
 /**
- * 퍼널 대화 시나리오 데이터.
- * 분야별 성과 칩과 프로필 문장 템플릿 — AI 백엔드 없이 결정적으로 생성한다.
- * "AI가 분석했다"고 말하지 않는다. 실제로 하는 것(경력 정리·조판)만 말한다.
+ * 퍼널 대화 시나리오 + 이력서 생성 데이터.
+ *
+ * 이력서 구성은 경력기술서 표준을 따른다:
+ * 기본정보 + 담당업무 + 수치화된 성과("문제→해결→결과", 수치 없으면 규모·기간·횟수로 대체).
+ * 참고: 잡코리아 경력기술서 가이드, 링커리어 경력기술서 양식 (2026-08 확인)
+ *
+ * AI 백엔드 없이 결정적으로 생성한다. "AI가 분석했다"고 말하지 않는다.
  */
 
-export interface AchvOption {
-  chip: string;      // 칩에 보이는 문구
-  title: string;     // 프로필 타이틀 [___]
-  bullets: string[]; // 핵심 역량 3줄
-}
+export interface Chip { emoji?: string; label: string }
+export interface AchvOption { chip: string; title: string; bullets: string[] }
 
-export const FIELD_CHIPS = [
+export type Answers = Partial<{
+  field: string; years: string; role: string; orgSize: string;
+  duty1: string; duty2: string; achv: string; achvNum: string;
+  tacit: string; style: string; cert: string; workType: string;
+  goal: string; name: string;
+}>;
+
+/* ---------- 분야별 데이터 ---------- */
+
+export const FIELD_CHIPS: Chip[] = [
   { emoji: '🏗️', label: '건설/건축' },
   { emoji: '⚙️', label: '기계/제조' },
   { emoji: '📊', label: '금융/영업' },
@@ -18,12 +28,6 @@ export const FIELD_CHIPS = [
   { emoji: '🚚', label: '물류/유통' },
   { emoji: '✍️', label: '직접 입력할게요' },
 ];
-
-export const YEAR_CHIPS = ['10년 이하', '10년~20년', '20년~30년', '30년 이상 평생'];
-
-export const ROLE_CHIPS = ['실무 전문가', '팀장·부장', '현장소장·공장장', '임원', '사장·대표'];
-
-export const GOAL_CHIPS = ['재취업 준비', '파트타임·자문', '창업 준비', '후배 멘토링'];
 
 const GENERIC_ACHV: AchvOption[] = [
   { chip: '조직·사람 관리', title: '조직 운영 전문가', bullets: ['수십 명 규모 조직의 목표 관리와 성과 창출', '세대를 아우르는 소통과 갈등 조정', '현장 중심의 실질적 리더십'] },
@@ -63,39 +67,224 @@ export const ACHV_BY_FIELD: Record<string, AchvOption[]> = {
     { chip: '매장·점포 운영', title: '유통 현장 전문가', bullets: ['입지·상권을 읽는 현장 데이터 감각', '아르바이트를 전력으로 만든 인력 운영', '고객 동선 하나까지 설계한 매장 관리'] },
     { chip: '거래처·상권 개척', title: '유통망 개척 리더', bullets: ['발로 뛰어 거래처를 늘려 온 개척 이력', '지역 상권의 생리를 꿰뚫는 정보력', '신뢰로 유지되는 장기 공급망'] },
   ],
-  직접입력: GENERIC_ACHV,
 };
 
 export function getAchvOptions(field: string): AchvOption[] {
   return ACHV_BY_FIELD[field] ?? GENERIC_ACHV;
 }
 
+const DUTIES_BY_FIELD: Record<string, string[]> = {
+  '건설/건축': ['공정·일정 관리', '안전 관리·감독', '협력업체 조율', '자재·원가 관리', '인력 배치·교육', '품질 검수'],
+  '기계/제조': ['생산 라인 운영', '품질 검사·관리', '설비 점검·정비', '공정 개선', '작업자 교육', '자재·재고 관리'],
+  '금융/영업': ['고객 상담·관리', '신규 고객 개척', '상품 제안·판매', '심사·리스크 관리', '지점·팀 운영', '실적·목표 관리'],
+  '교육/연구': ['강의·교육 진행', '교육과정 설계', '연구·실험 수행', '학생·수강생 상담', '기관 운영·행정', '평가·품질 관리'],
+  '물류/유통': ['입출고·재고 관리', '배송·운송 관리', '매장·점포 운영', '발주·구매 관리', '거래처 관리', '인력 운영'],
+};
+const GENERIC_DUTIES = ['조직·인력 관리', '고객·거래처 관리', '기술·실무 수행', '기획·개선 업무', '교육·후배 양성', '운영·행정 관리'];
+
+export function getDutyChips(field: string): string[] {
+  return DUTIES_BY_FIELD[field] ?? GENERIC_DUTIES;
+}
+
+/* 성과 수치화 꼬리질문 — 수치가 없으면 규모·기간·횟수로 대체 (경력기술서 표준) */
+const ACHVNUM_BY_FIELD: Record<string, string[]> = {
+  '건설/건축': ['무사고 5년 이상 유지', '최대 100명 규모 현장 지휘', '수십억 규모 프로젝트 완수', '공기 지연 없이 준공 다수'],
+  '기계/제조': ['불량률 절반 이하로 개선', '라인 가동률 90% 이상 유지', '수십 명 작업자 관리', '연간 수억 원 원가 절감 기여'],
+  '금융/영업': ['거래 고객 수백 명 관리', '목표 달성률 상위권 유지', '10년 이상 장기 고객 다수', '억 단위 계약 다수 성사'],
+  '교육/연구': ['누적 수강생 수천 명', '강의 만족도 상위권 유지', '논문·보고서 다수 발표', '수백 건 상담 수행'],
+  '물류/유통': ['일 수천 건 물량 처리', '재고 정확도 99% 유지', '수십 개 거래처 관리', '성수기 무사고 운영'],
+};
+const GENERIC_ACHVNUM = ['10년 이상 한 분야 유지', '수십 명 규모 조직 관리', '연 단위 목표 초과 달성', '숫자보다 신뢰로 증명'];
+
+export function getAchvNumChips(field: string): string[] {
+  return ACHVNUM_BY_FIELD[field] ?? GENERIC_ACHVNUM;
+}
+
+/* 암묵지 — B2B 데이터의 핵심. 칩은 마중물이고 직접입력이 진짜다 */
+export const TACIT_CHIPS: Chip[] = [
+  { label: '기본을 지키는 게 제일 빠르다' },
+  { label: '사람을 남기는 게 일을 남기는 것' },
+  { label: '현장의 답은 현장에 있다' },
+  { label: '신뢰는 쌓는 데 10년, 잃는 건 하루' },
+  { emoji: '✍️', label: '직접 입력할게요' },
+];
+
+export const STYLE_CHIPS = ['꼼꼼하다는 말을 많이 듣습니다', '책임감 하나는 자신 있습니다', '사람들과 두루 잘 지냅니다', '위기에 침착합니다'];
+
+export const CERT_CHIPS: Chip[] = [
+  { label: '국가기술자격 보유' },
+  { label: '운전면허·중장비 가능' },
+  { label: '컴퓨터·문서 작업 가능' },
+  { label: '경력이 곧 자격입니다' },
+  { emoji: '✍️', label: '직접 입력할게요' },
+];
+
+export const ORG_CHIPS = ['혼자 또는 소규모', '10명 안팎 조직', '수십 명 규모 조직', '100명 이상 조직'];
+export const YEAR_CHIPS = ['10년 이하', '10년~20년', '20년~30년', '30년 이상 평생'];
+export const ROLE_CHIPS = ['실무 전문가', '팀장·부장', '현장소장·공장장', '임원', '사장·대표'];
+export const WORKTYPE_CHIPS = ['풀타임 정규직', '파트타임', '자문·프로젝트 단위', '형태는 상관없음'];
+export const GOAL_CHIPS = ['재취업 준비', '파트타임·자문', '창업 준비', '후배 멘토링'];
+
+/* ---------- 대화 흐름 (config-driven) ---------- */
+
+export interface FlowStep {
+  key: keyof Answers;
+  ask: (a: Answers) => string;       // 봇 질문 (직전 답 맞장구 포함)
+  chips: (a: Answers) => Chip[];
+  sentence: (label: string) => string; // 칩 → 채팅창 자동 타이핑 문장
+  skipLabel?: string;                  // 이 라벨이면 건너뜀 (답 저장 안 함)
+}
+
+const toChips = (ls: string[]): Chip[] => ls.map((label) => ({ label }));
+
+export const FLOW: FlowStep[] = [
+  {
+    key: 'field',
+    ask: () => '가장 오래 일하신 분야가 어디신가요?',
+    chips: () => FIELD_CHIPS,
+    sentence: (l) => `${l} 분야에서 오래 일했습니다.`,
+  },
+  {
+    key: 'years',
+    ask: (a) => `${a.field} — 역시 그 세월이 느껴집니다. 대략 어느 정도 기간 동안 몸담으셨나요?`,
+    chips: () => toChips(YEAR_CHIPS),
+    sentence: (l) => `${l} 몸담았습니다.`,
+  },
+  {
+    key: 'role',
+    ask: () => '그 시간 동안 주로 어떤 역할을 맡으셨나요?',
+    chips: () => toChips(ROLE_CHIPS),
+    sentence: (l) => `${l}(으)로 일했습니다.`,
+  },
+  {
+    key: 'orgSize',
+    ask: (a) => `${a.role}이셨군요, 책임이 많으셨겠습니다. 어느 정도 규모의 조직에서 일하셨나요?`,
+    chips: () => toChips(ORG_CHIPS),
+    sentence: (l) => `${l}에서 일했습니다.`,
+  },
+  {
+    key: 'duty1',
+    ask: () => '주로 어떤 업무를 담당하셨나요? 제일 가까운 것 하나만 골라주세요.',
+    chips: (a) => toChips(getDutyChips(a.field ?? '')),
+    sentence: (l) => `${l} 업무를 주로 했습니다.`,
+  },
+  {
+    key: 'duty2',
+    ask: () => '하나 더 꼽는다면요? (이걸로 충분하시면 건너뛰셔도 됩니다)',
+    chips: (a) => [...toChips(getDutyChips(a.field ?? '').filter((d) => d !== a.duty1)), { emoji: '👌', label: '이걸로 충분해요' }],
+    sentence: (l) => `${l}도 함께 했습니다.`,
+    skipLabel: '이걸로 충분해요',
+  },
+  {
+    key: 'achv',
+    ask: () => '이력서가 절반 넘게 채워졌습니다. 이제 제일 중요한 질문 — 딱 하나만 꼽는다면, 가장 자랑할 만한 것은 무엇인가요?',
+    chips: (a) => toChips(getAchvOptions(a.field ?? '').map((o) => o.chip)),
+    sentence: (l) => `${l}이(가) 제일 자랑스럽습니다.`,
+  },
+  {
+    key: 'achvNum',
+    ask: () => '멋집니다. 그 성과, 숫자나 규모로 하면 어느 쪽에 가장 가깝나요? (이력서는 숫자가 있어야 힘이 생깁니다)',
+    chips: (a) => toChips(getAchvNumChips(a.field ?? '')),
+    sentence: (l) => `${l} 정도 됩니다.`,
+  },
+  {
+    key: 'tacit',
+    ask: () => '이건 이력서 밖의 질문인데요 — 그 세월에서 배운 것을 후배에게 딱 한 문장만 전한다면, 뭐라고 하시겠어요?',
+    chips: () => TACIT_CHIPS,
+    sentence: (l) => `"${l}" — 이 한마디입니다.`,
+  },
+  {
+    key: 'style',
+    ask: () => '좋은 말씀입니다, 이력서에 꼭 담겠습니다. 주변 분들은 대표님을 어떤 사람이라고 하나요?',
+    chips: () => toChips(STYLE_CHIPS),
+    sentence: (l) => `"${l}"라는 말을 듣습니다.`,
+  },
+  {
+    key: 'cert',
+    ask: () => '거의 다 왔습니다. 보유하신 자격증이나 특별히 내세울 무기가 있나요?',
+    chips: () => CERT_CHIPS,
+    sentence: (l) => `${l}.`,
+  },
+  {
+    key: 'workType',
+    ask: () => '앞으로는 어떤 형태로 일하고 싶으세요?',
+    chips: () => toChips(WORKTYPE_CHIPS),
+    sentence: (l) => `${l}를 생각하고 있습니다.`,
+  },
+  {
+    key: 'goal',
+    ask: () => '마지막 질문입니다. 이 경험을 앞으로 어디에 쓰고 싶으세요?',
+    chips: () => toChips(GOAL_CHIPS),
+    sentence: (l) => `${l}가 목표입니다.`,
+  },
+];
+
+/* ---------- 이력서 생성 ---------- */
+
 const GOAL_PHRASE: Record<string, string> = {
-  '재취업 준비': '새 일터에서 다시 증명하는 데',
-  '파트타임·자문': '필요한 곳에 필요한 만큼 나누는 데',
-  '창업 준비': '내 이름을 건 새 시작에',
-  '후배 멘토링': '다음 세대를 키우는 데',
+  '재취업 준비': '새 일터에서 다시 증명하는 것',
+  '파트타임·자문': '필요한 곳에 필요한 만큼 나누는 것',
+  '창업 준비': '내 이름을 건 새 시작',
+  '후배 멘토링': '다음 세대를 키우는 것',
 };
 
-export interface ProfileInput {
-  field: string;
-  years: string;
-  role: string;
-  achv: AchvOption;
-  goal: string;
-  name: string; // 빈 값이면 "무명의 전문가"
+export interface Resume {
+  name: string;
+  title: string;          // [안전 관리 마스터]
+  headline: string;       // 30년 건설/건축 현장소장
+  targetLine: string;     // 희망: 재취업 · 풀타임
+  competencies: string[]; // 핵심역량 (성과 bullets + 스타일)
+  career: {
+    period: string; org: string; role: string;
+    duties: string[]; achievement: string;
+  } | null;
+  certs: string;
+  tacitQuote: string;     // 자기소개 핵심 한 줄
+  summary: string;        // 자기소개 요약
 }
 
-export function buildProfile(p: ProfileInput) {
+export function buildResume(a: Answers): Resume {
+  const achvOpt = getAchvOptions(a.field ?? '').find((o) => o.chip === a.achv);
+  const duties = [a.duty1, a.duty2].filter(Boolean) as string[];
   return {
-    seal: 'Verified by Dalnaru',
-    title: `[${p.achv.title}]`,
-    subtitle: `${p.years} ${p.field} ${p.role}`,
-    name: p.name || '무명의 전문가',
-    summary:
-      `${p.years} 동안 ${p.field} 현장을 지켜온 ${p.role}입니다. ` +
-      `이제 그 경험을 ${GOAL_PHRASE[p.goal] ?? '새로운 시작에'} 쓰려 합니다.`,
-    bullets: p.achv.bullets,
-    goal: p.goal,
+    name: a.name || '',
+    title: achvOpt ? `[${achvOpt.title}]` : '',
+    headline: [a.years, a.field, a.role].filter(Boolean).join(' '),
+    targetLine: [a.goal, a.workType].filter(Boolean).join(' · '),
+    competencies: [
+      ...(achvOpt?.bullets ?? []),
+      ...(a.style ? [a.style.replace(/라는 말을.*$/, '').replace(/"/g, '')] : []),
+    ].slice(0, 4),
+    career: a.field
+      ? {
+          period: a.years ?? '',
+          org: [a.field, a.orgSize].filter(Boolean).join(' · '),
+          role: a.role ?? '',
+          duties,
+          achievement: [a.achv, a.achvNum].filter(Boolean).join(' — '),
+        }
+      : null,
+    certs: a.cert === '경력이 곧 자격입니다' ? `별도 자격 대신 ${a.years ?? ''} 실무 경력으로 증명` : (a.cert ?? ''),
+    tacitQuote: a.tacit ?? '',
+    summary: a.field
+      ? `${a.years ?? ''} 동안 ${a.field} 현장을 지켜온 ${a.role ?? '전문가'}입니다. ` +
+        (a.achvNum ? `${a.achvNum}의 기록이 제 일하는 방식을 증명합니다. ` : '') +
+        (a.goal ? `이제 그 경험으로 ${GOAL_PHRASE[a.goal] ?? '새로운 시작'}을 준비하고 있습니다.` : '')
+      : '',
   };
 }
+
+/* 이력서 완성도(%) — 게이지용 */
+export function resumeProgress(a: Answers): number {
+  const keys: (keyof Answers)[] = ['field', 'years', 'role', 'orgSize', 'duty1', 'achv', 'achvNum', 'tacit', 'style', 'cert', 'workType', 'goal'];
+  const filled = keys.filter((k) => a[k]).length;
+  return Math.round((filled / keys.length) * 100);
+}
+
+/* 티저용 샘플 */
+export const SAMPLE_ANSWERS: Answers = {
+  field: '건설/건축', years: '30년 이상 평생', role: '현장소장·공장장', orgSize: '수십 명 규모 조직',
+  duty1: '공정·일정 관리', duty2: '안전 관리·감독', achv: '무사고 현장 운영', achvNum: '무사고 5년 이상 유지',
+  tacit: '현장의 답은 현장에 있다', style: '책임감 하나는 자신 있습니다', cert: '국가기술자격 보유',
+  workType: '파트타임', goal: '후배 멘토링', name: '김ㅇㅇ',
+};
