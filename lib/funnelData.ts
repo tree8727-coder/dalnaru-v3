@@ -14,9 +14,18 @@ export interface AchvOption { chip: string; title: string; bullets: string[] }
 export type Answers = Partial<{
   field: string; years: string; role: string; orgSize: string;
   duty1: string; duty2: string; achv: string; achvNum: string;
+  hardMoment: string; overcome: string; proudMoment: string;
   tacit: string; style: string; cert: string; workType: string;
   goal: string; name: string;
 }>;
+
+/* 답변이 이력서 어느 칸에 들어가는지 — 답할 때마다 "○○에 반영됨 ✓" 보상 표시용 */
+export const REWARD_BY_KEY: Record<string, string> = {
+  field: '경력 사항', years: '경력 사항', role: '경력 사항', orgSize: '경력 사항',
+  duty1: '담당 업무', duty2: '담당 업무', achv: '주요 성과', achvNum: '주요 성과',
+  hardMoment: '주요 경험', overcome: '주요 경험', proudMoment: '주요 경험',
+  tacit: '자기소개', style: '핵심 역량', cert: '자격 사항', workType: '희망 사항', goal: '희망 사항',
+};
 
 /* ---------- 분야별 데이터 ---------- */
 
@@ -188,8 +197,26 @@ export const FLOW: FlowStep[] = [
     sentence: (l) => `${l} 정도 됩니다.`,
   },
   {
+    key: 'hardMoment',
+    ask: () => '숫자는 다 받았습니다. 이제부터는 이력서에 깊이를 넣는 질문입니다 — 그 세월 중 가장 큰 고비는 어떤 종류였나요?',
+    chips: () => toChips(['사람 문제로 힘들 때', '실적·자금 압박', '사고·품질 문제', '조직 개편·구조조정']),
+    sentence: (l) => `${l}이(가) 가장 큰 고비였습니다.`,
+  },
+  {
+    key: 'overcome',
+    ask: () => '다들 그 지점에서 무너지는데, 버텨내셨네요. 어떻게 넘기셨나요? (이 답이 이력서의 「위기 대응」 항목이 됩니다)',
+    chips: () => toChips(['정면 돌파했습니다', '사람들과 함께 풀었습니다', '원칙대로 차근차근', '버티며 때를 기다렸습니다']),
+    sentence: (l) => l,
+  },
+  {
+    key: 'proudMoment',
+    ask: () => '반대로, 지금 떠올려도 제일 뿌듯한 순간은 언제였나요?',
+    chips: () => toChips(['키운 후배가 성장했을 때', '어려운 목표를 해냈을 때', '주변의 인정을 받았을 때', '큰 사고를 막아냈을 때']),
+    sentence: (l) => `${l}가 제일 뿌듯합니다.`,
+  },
+  {
     key: 'tacit',
-    ask: () => '이건 이력서 밖의 질문인데요 — 그 세월에서 배운 것을 후배에게 딱 한 문장만 전한다면, 뭐라고 하시겠어요?',
+    ask: () => '좋은 이야기라 이력서 「주요 경험」에 담았습니다. 하나만 더 — 그 세월에서 배운 것을 후배에게 딱 한 문장으로 전한다면요?',
     chips: () => TACIT_CHIPS,
     sentence: (l) => `"${l}" — 이 한마디입니다.`,
   },
@@ -228,29 +255,63 @@ const GOAL_PHRASE: Record<string, string> = {
   '후배 멘토링': '다음 세대를 키우는 것',
 };
 
+/* 경험 일화 → 이력서 「주요 경험」 문장 변환 */
+const HARD_PHRASE: Record<string, string> = {
+  '사람 문제로 힘들 때': '사람 사이의 갈등',
+  '실적·자금 압박': '실적과 자금의 압박',
+  '사고·품질 문제': '사고와 품질 위기',
+  '조직 개편·구조조정': '조직 개편의 격랑',
+};
+const OVERCOME_PHRASE: Record<string, string> = {
+  '정면 돌파했습니다': '정면 돌파로',
+  '사람들과 함께 풀었습니다': '사람들과 함께',
+  '원칙대로 차근차근': '원칙을 지키며',
+  '버티며 때를 기다렸습니다': '긴 호흡으로',
+};
+const PROUD_PHRASE: Record<string, string> = {
+  '키운 후배가 성장했을 때': '후배 양성에서 보람을 찾아 온 사람입니다',
+  '어려운 목표를 해냈을 때': '어려운 목표일수록 힘을 내는 사람입니다',
+  '주변의 인정을 받았을 때': '묵묵한 일로 신뢰를 쌓아 온 사람입니다',
+  '큰 사고를 막아냈을 때': '보이지 않는 곳에서 사고를 막아 온 사람입니다',
+};
+
 export interface Resume {
   name: string;
   title: string;          // [안전 관리 마스터]
   headline: string;       // 30년 건설/건축 현장소장
-  targetLine: string;     // 희망: 재취업 · 풀타임
+  goal: string;           // 희망 직무
+  workType: string;       // 희망 근무 형태
   competencies: string[]; // 핵심역량 (성과 bullets + 스타일)
   career: {
     period: string; org: string; role: string;
     duties: string[]; achievement: string;
   } | null;
+  experiences: string[];  // 주요 경험 (위기 대응·성취)
   certs: string;
   tacitQuote: string;     // 자기소개 핵심 한 줄
-  summary: string;        // 자기소개 요약
+  summary: string;        // 경력 요약
 }
 
 export function buildResume(a: Answers): Resume {
   const achvOpt = getAchvOptions(a.field ?? '').find((o) => o.chip === a.achv);
   const duties = [a.duty1, a.duty2].filter(Boolean) as string[];
+
+  const experiences: string[] = [];
+  if (a.hardMoment && a.overcome) {
+    experiences.push(
+      `위기 대응 — ${HARD_PHRASE[a.hardMoment] ?? a.hardMoment} 앞에서도 ${OVERCOME_PHRASE[a.overcome] ?? ''} 조직을 지켜낸 경험이 있습니다.`,
+    );
+  }
+  if (a.proudMoment) {
+    experiences.push(`성취 — ${PROUD_PHRASE[a.proudMoment] ?? a.proudMoment}.`);
+  }
+
   return {
     name: a.name || '',
     title: achvOpt ? `[${achvOpt.title}]` : '',
     headline: [a.years, a.field, a.role].filter(Boolean).join(' '),
-    targetLine: [a.goal, a.workType].filter(Boolean).join(' · '),
+    goal: a.goal ?? '',
+    workType: a.workType ?? '',
     competencies: [
       ...(achvOpt?.bullets ?? []),
       ...(a.style ? [a.style.replace(/라는 말을.*$/, '').replace(/"/g, '')] : []),
@@ -264,6 +325,7 @@ export function buildResume(a: Answers): Resume {
           achievement: [a.achv, a.achvNum].filter(Boolean).join(' — '),
         }
       : null,
+    experiences,
     certs: a.cert === '경력이 곧 자격입니다' ? `별도 자격 대신 ${a.years ?? ''} 실무 경력으로 증명` : (a.cert ?? ''),
     tacitQuote: a.tacit ?? '',
     summary: a.field
@@ -276,7 +338,7 @@ export function buildResume(a: Answers): Resume {
 
 /* 이력서 완성도(%) — 게이지용 */
 export function resumeProgress(a: Answers): number {
-  const keys: (keyof Answers)[] = ['field', 'years', 'role', 'orgSize', 'duty1', 'achv', 'achvNum', 'tacit', 'style', 'cert', 'workType', 'goal'];
+  const keys: (keyof Answers)[] = ['field', 'years', 'role', 'orgSize', 'duty1', 'achv', 'achvNum', 'hardMoment', 'overcome', 'proudMoment', 'tacit', 'style', 'cert', 'workType', 'goal'];
   const filled = keys.filter((k) => a[k]).length;
   return Math.round((filled / keys.length) * 100);
 }
@@ -285,6 +347,7 @@ export function resumeProgress(a: Answers): number {
 export const SAMPLE_ANSWERS: Answers = {
   field: '건설/건축', years: '30년 이상 평생', role: '현장소장·공장장', orgSize: '수십 명 규모 조직',
   duty1: '공정·일정 관리', duty2: '안전 관리·감독', achv: '무사고 현장 운영', achvNum: '무사고 5년 이상 유지',
+  hardMoment: '사고·품질 문제', overcome: '원칙대로 차근차근', proudMoment: '큰 사고를 막아냈을 때',
   tacit: '현장의 답은 현장에 있다', style: '책임감 하나는 자신 있습니다', cert: '국가기술자격 보유',
   workType: '파트타임', goal: '후배 멘토링', name: '김ㅇㅇ',
 };

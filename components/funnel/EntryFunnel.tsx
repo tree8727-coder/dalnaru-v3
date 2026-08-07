@@ -1,14 +1,15 @@
 'use client';
 
 /**
- * 진입 퍼널 v3 — 대화형 이력서 작성.
+ * 진입 퍼널 v3.1 — 대화형 이력서 작성.
  *
- * 설계
- * - 14문항 대화. 답할 때마다 상단 게이지("이력서 N% 완성")가 차오르고,
- *   게이지를 누르면 채워지는 이력서를 실시간으로 볼 수 있다 — 완성 과정이 동기부여.
- * - 질문 흐름은 lib/funnelData.ts의 FLOW 배열(데이터)이다. 질문 추가 = 데이터 추가.
- * - 모든 응답은 Firestore에 저장 — 특히 성과·암묵지·목표가 B2B/B2C 데이터.
- * - 완료 후: 흰 종이 경력기술서 + 규칙 기반 일자리 추천 + 공고 맞춤 재배치 + PDF.
+ * v3.1 수정 (사용자 피드백):
+ * - 더블 전송 버그: 자동 타이핑 중 전송 버튼 비활성 + 중복 커밋 가드
+ * - 칩이 화면 밖으로 밀리던 것: 가로 스크롤 대신 줄바꿈(5070에게 숨은 스크롤은 없는 것)
+ * - 티저가 너무 빨리 지나감: "시작하기" 버튼을 누를 때까지 예시가 머무름
+ * - 보상 확신: 시작 전에 산출물(이력서 PDF + 맞춤 일자리)을 명시하고,
+ *   답할 때마다 "○○에 반영됨 ✓"이 게이지에 뜸
+ * - 이탈 방지: 작성 중 창을 닫으면 확인창 + 재방문 시 "이어서 하기"
  *
  * ⚠ MOCK 수치 — TOAST_FEED / GREETING의 "314명" 등은 실측 아님. 실측 전 출시 금지.
  */
@@ -17,7 +18,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import ResumeDoc from './ResumeDoc';
 import JobMatches from './JobMatches';
 import {
-  FLOW, buildResume, resumeProgress, SAMPLE_ANSWERS,
+  FLOW, REWARD_BY_KEY, buildResume, resumeProgress, SAMPLE_ANSWERS,
   type Answers, type Chip,
 } from '@/lib/funnelData';
 import { matchJobs, JOB_POOL } from '@/lib/jobMatch';
@@ -25,7 +26,9 @@ import { newSessionId, saveFunnel, type FunnelStep } from '@/lib/funnelCollect';
 
 type Role = 'bot' | 'user';
 interface Msg { role: Role; text: string; typing?: boolean }
-type Stage = 'greeting' | 'flow' | 'loading' | 'name' | 'result';
+type Stage = 'greeting' | 'gate' | 'flow' | 'loading' | 'name' | 'result';
+
+const STORE_KEY = 'dalnaru_funnel_v3';
 
 // MOCK: 실측 아님 — 출시 전 실제 이벤트 피드로 교체
 const TOAST_FEED = [
@@ -36,16 +39,27 @@ const TOAST_FEED = [
 // MOCK: "314명"은 실측 아님
 const GREETING = [
   '반갑습니다, 대표님! 👏 저는 대표님의 평생 경력을 기업에 바로 낼 수 있는 이력서로 정리해 드리는 달나루입니다.',
-  '이번 주에만 314명의 선배님들이 아래와 같은 이력서를 만들어 가셨습니다.',
+  '이번 주에만 314명의 선배님들이 아래와 같은 이력서를 만들어 가셨습니다. 천천히 살펴보세요.',
 ];
-const GREETING_AFTER_TEASER =
-  '몇 가지만 여쭤보면 됩니다. 타이핑은 없습니다 — 버튼만 눌러 주세요. 위의 게이지에서 이력서가 채워지는 걸 보실 수 있습니다.';
+const PROMISE =
+  '대화를 마치면 두 가지를 바로 드립니다.\n① 위 형식의 제출용 이력서 (PDF 저장 가능)\n② 대표님 조건에 맞는 일자리 추천\n\n타이핑은 없습니다. 버튼만 누르시면 되고, 답하실 때마다 위쪽 게이지에서 이력서가 채워지는 게 보입니다. 준비되시면 시작 버튼을 눌러 주세요.';
 
 const LOADING_STEPS = [
   '응답하신 내용을 경력기술서 형식으로 조판 중…',
   '성과를 수치 중심으로 정리 중…',
   '대표님 조건과 맞는 일자리 대조 중…',
 ];
+
+interface Saved { answers: Answers; stepIdx: number }
+
+function loadSaved(): Saved | null {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw) as Saved;
+    return s.stepIdx > 0 && s.stepIdx < FLOW.length ? s : null;
+  } catch { return null; }
+}
 
 export default function EntryFunnel() {
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -55,12 +69,17 @@ export default function EntryFunnel() {
   const [inputText, setInputText] = useState('');
   const [chipsEnabled, setChipsEnabled] = useState(false);
   const [manualMode, setManualMode] = useState(false);
+  const [autoTyping, setAutoTyping] = useState(false);
   const [showTeaser, setShowTeaser] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
+  const [reward, setReward] = useState<string | null>(null);
+  const [resumeOffer, setResumeOffer] = useState<Saved | null>(null);
 
   const session = useRef({ id: newSessionId(), startedAt: 0, steps: [] as FunnelStep[] });
+  const committing = useRef(false); // 더블 전송 가드
+  const leaving = useRef(false);    // "처음부터 다시"는 확인창 없이
   const scrollRef = useRef<HTMLDivElement>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const later = useCallback((fn: () => void, ms: number) => {
@@ -71,6 +90,19 @@ export default function EntryFunnel() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, inputText, showTeaser, loadingStep, stage, selectedJob]);
+
+  // 작성 중 이탈 방지
+  useEffect(() => {
+    const guard = (e: BeforeUnloadEvent) => {
+      if (leaving.current) return;
+      if (stage === 'flow' || stage === 'name') {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', guard);
+    return () => window.removeEventListener('beforeunload', guard);
+  }, [stage]);
 
   const record = (q: string, a: string, done = false) => {
     session.current.steps.push({ q, a, tMs: Date.now() - session.current.startedAt });
@@ -93,50 +125,101 @@ export default function EntryFunnel() {
     later(tick, 16);
   }, [later]);
 
-  // 인사 → 티저 → 첫 질문
+  // 시작: 저장된 진행분이 있으면 이어하기 제안, 없으면 인사
   useEffect(() => {
     session.current.startedAt = Date.now();
+    const saved = loadSaved();
+    if (saved) {
+      setResumeOffer(saved);
+      later(() => botSay(
+        `다시 오셨네요, 반갑습니다! 지난번에 이력서를 ${resumeProgress(saved.answers)}%까지 만드셨어요. 이어서 할까요?`,
+        () => setChipsEnabled(true),
+      ), 600);
+      return;
+    }
+    runGreeting();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const runGreeting = () => {
     later(() => botSay(GREETING[0], () =>
       later(() => botSay(GREETING[1], () =>
         later(() => {
           setShowTeaser(true);
-          later(() => botSay(GREETING_AFTER_TEASER, () =>
-            later(() => {
-              setStage('flow');
-              botSay(FLOW[0].ask({}), () => setChipsEnabled(true));
-            }, 250),
-          ), 900);
+          later(() => botSay(PROMISE, () => {
+            setStage('gate');
+            setChipsEnabled(true);
+          }), 1200);
         }, 300),
       ), 350),
     ), 700);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  };
+
+  const askStep = (idx: number, a: Answers) => {
+    setStepIdx(idx);
+    later(() => botSay(FLOW[idx].ask(a), () => {
+      committing.current = false;
+      setChipsEnabled(true);
+    }), 420);
+  };
 
   const currentStep = stage === 'flow' ? FLOW[stepIdx] : null;
 
   const chips: Chip[] =
-    stage === 'flow' && currentStep ? currentStep.chips(answers)
+    resumeOffer ? [{ emoji: '▶️', label: '이어서 하기' }, { emoji: '🔄', label: '처음부터 새로' }]
+    : stage === 'gate' ? [{ emoji: '🚀', label: '좋아요, 시작하기' }]
+    : stage === 'flow' && currentStep ? currentStep.chips(answers)
     : stage === 'name' ? [{ emoji: '🙈', label: '이름 없이 만들기' }, { emoji: '✍️', label: '직접 입력할게요' }]
     : [];
 
   const handleChip = (label: string) => {
-    if (!chipsEnabled) return;
+    if (!chipsEnabled || autoTyping) return;
     navigator.vibrate?.(12);
+
+    if (resumeOffer) {
+      const saved = resumeOffer;
+      setResumeOffer(null);
+      setChipsEnabled(false);
+      setMessages((m) => [...m, { role: 'user', text: label }]);
+      if (label === '이어서 하기') {
+        setAnswers(saved.answers);
+        setStage('flow');
+        botSay('좋습니다, 이어서 갑니다!', () => askStep(saved.stepIdx, saved.answers));
+      } else {
+        localStorage.removeItem(STORE_KEY);
+        runGreeting();
+      }
+      return;
+    }
+
+    if (stage === 'gate') {
+      setChipsEnabled(false);
+      setMessages((m) => [...m, { role: 'user', text: label }]);
+      setStage('flow');
+      askStep(0, answers);
+      return;
+    }
+
     if (label === '직접 입력할게요') { setManualMode(true); return; }
     if (stage === 'name' && label === '이름 없이 만들기') { commitAnswer(''); return; }
+
     setChipsEnabled(false);
+    setAutoTyping(true);
     const sentence = currentStep ? currentStep.sentence(label) : label;
     let i = 0;
     const type = () => {
       i += 1;
       setInputText(sentence.slice(0, i));
       if (i < sentence.length) later(type, 36);
-      else later(() => commitAnswer(label, sentence), 320);
+      else later(() => { setAutoTyping(false); commitAnswer(label, sentence); }, 320);
     };
     later(type, 100);
   };
 
   const commitAnswer = (label: string, sentence?: string) => {
+    if (committing.current) return; // 더블 전송 가드
+    committing.current = true;
+
     setInputText('');
     setManualMode(false);
     const shown = sentence ?? label;
@@ -145,6 +228,7 @@ export default function EntryFunnel() {
     if (stage === 'name') {
       setAnswers((a) => ({ ...a, name: label.trim() }));
       record('성함', label.trim() ? '(입력함)' : '(건너뜀)', true); // 이름 원문은 이력서에만
+      localStorage.removeItem(STORE_KEY); // 완주 — 이어하기 데이터 정리
       later(() => {
         setStage('result');
         botSay('완성됐습니다! 기업에 바로 제출할 수 있는 형식으로 정리했고, 맞는 일자리도 함께 찾아 두었습니다. 공고를 누르면 그 공고에 맞춰 이력서가 다시 정렬됩니다.');
@@ -152,18 +236,24 @@ export default function EntryFunnel() {
       return;
     }
 
-    if (!currentStep) return;
+    if (!currentStep) { committing.current = false; return; }
     const skipped = currentStep.skipLabel === label;
     const nextAnswers: Answers = skipped ? answers : { ...answers, [currentStep.key]: label };
     if (!skipped) {
       setAnswers(nextAnswers);
       record(currentStep.key, label);
+      // 보상 표시: 이 답이 이력서 어디에 들어갔는지
+      const slot = REWARD_BY_KEY[currentStep.key];
+      if (slot) {
+        setReward(`✓ 「${slot}」에 반영됐습니다`);
+        later(() => setReward(null), 1800);
+      }
     }
 
     const nextIdx = stepIdx + 1;
     if (nextIdx < FLOW.length) {
-      setStepIdx(nextIdx);
-      later(() => botSay(FLOW[nextIdx].ask(nextAnswers), () => setChipsEnabled(true)), 420);
+      try { localStorage.setItem(STORE_KEY, JSON.stringify({ answers: nextAnswers, stepIdx: nextIdx } satisfies Saved)); } catch { /* 무시 */ }
+      askStep(nextIdx, nextAnswers);
     } else {
       startLoading();
     }
@@ -175,8 +265,17 @@ export default function EntryFunnel() {
     LOADING_STEPS.forEach((_, i) => later(() => setLoadingStep(i + 1), 850 * (i + 1)));
     later(() => {
       setStage('name');
-      botSay('거의 다 됐습니다! 이력서에 올릴 성함만 알려주세요. (원치 않으시면 이름 없이 만들어 드립니다)', () => setChipsEnabled(true));
+      botSay('거의 다 됐습니다! 이력서에 올릴 성함만 알려주세요. (원치 않으시면 이름 없이 만들어 드립니다)', () => {
+        committing.current = false;
+        setChipsEnabled(true);
+      });
     }, 850 * LOADING_STEPS.length + 350);
+  };
+
+  const restart = () => {
+    leaving.current = true;
+    localStorage.removeItem(STORE_KEY);
+    window.location.reload();
   };
 
   const progress = stage === 'result' ? 100 : resumeProgress(answers);
@@ -189,11 +288,10 @@ export default function EntryFunnel() {
     <div className="funnel-shell">
       <ToastNudge />
 
-      {/* 이력서 완성도 게이지 — 누르면 실시간 미리보기 */}
-      {stage !== 'greeting' && stage !== 'result' && (
+      {(stage === 'flow' || stage === 'loading' || stage === 'name') && (
         <button className="resume-gaugebar" onClick={() => setShowPreview((v) => !v)}>
           <span>📄 내 이력서 {progress}% 완성</span>
-          <span className="resume-gaugebar-hint">{showPreview ? '접기 ▲' : '보기 ▼'}</span>
+          <span className="resume-gaugebar-hint">{reward ?? (showPreview ? '접기 ▲' : '보기 ▼')}</span>
           <div className="funnel-gauge"><div className="funnel-gauge-fill" style={{ width: `${progress}%` }} /></div>
         </button>
       )}
@@ -205,13 +303,12 @@ export default function EntryFunnel() {
 
       <div className="funnel-chat" ref={scrollRef}>
         {messages.slice(0, 2).map((m, i) => <Bubble key={i} m={m} />)}
-        {showTeaser && stage === 'greeting' && (
+        {showTeaser && (stage === 'greeting' || stage === 'gate') && (
           <div className="resume-teaser">
             <div className="profile-teaser-label">완성 예시</div>
             <ResumeDoc resume={sampleResume} />
           </div>
         )}
-        {showTeaser && stage !== 'greeting' && null}
         {messages.slice(2).map((m, i) => <Bubble key={i + 2} m={m} />)}
 
         {stage === 'loading' && (
@@ -234,7 +331,7 @@ export default function EntryFunnel() {
               </button>
             </div>
             <JobMatches matches={matches} selectedId={selectedJob} onSelect={setSelectedJob} />
-            <button className="funnel-restart" onClick={() => window.location.reload()}>처음부터 다시</button>
+            <button className="funnel-restart" onClick={restart}>처음부터 다시</button>
             <p className="funnel-privacy">
               선택하신 내용(분야·기간·역할·성과·목표 등)은 서비스 개선을 위해 저장됩니다. 성함은 이력서에만 쓰입니다.
             </p>
@@ -245,7 +342,7 @@ export default function EntryFunnel() {
       {chips.length > 0 && (
         <div className="funnel-chips" role="group" aria-label="답변 선택">
           {chips.map((c) => (
-            <button key={c.label} className="funnel-chip" disabled={!chipsEnabled} onClick={() => handleChip(c.label)}>
+            <button key={c.label} className="funnel-chip" disabled={!chipsEnabled || autoTyping} onClick={() => handleChip(c.label)}>
               {c.emoji && <span aria-hidden>{c.emoji} </span>}
               {c.label}
             </button>
@@ -253,7 +350,7 @@ export default function EntryFunnel() {
         </div>
       )}
 
-      {stage !== 'result' && stage !== 'loading' && (
+      {stage !== 'result' && stage !== 'loading' && stage !== 'greeting' && (
         <div className="funnel-inputbar">
           {manualMode ? (
             <input
@@ -270,7 +367,12 @@ export default function EntryFunnel() {
               {inputText && <span className="funnel-caret" />}
             </div>
           )}
-          <button className="funnel-send" aria-label="전송" disabled={!inputText.trim()} onClick={() => inputText.trim() && commitAnswer(inputText.trim())}>
+          <button
+            className="funnel-send"
+            aria-label="전송"
+            disabled={!inputText.trim() || autoTyping || !manualMode}
+            onClick={() => manualMode && inputText.trim() && commitAnswer(inputText.trim())}
+          >
             ↑
           </button>
         </div>
@@ -282,7 +384,12 @@ export default function EntryFunnel() {
 function Bubble({ m }: { m: Msg }) {
   return (
     <div className={`funnel-bubble ${m.role}`}>
-      {m.text}
+      {m.text.split('\n').map((line, i) => (
+        <span key={i}>
+          {i > 0 && <br />}
+          {line}
+        </span>
+      ))}
       {m.typing && <span className="funnel-caret" />}
     </div>
   );
