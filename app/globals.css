@@ -151,3 +151,155 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   background: var(--primary-hover);
 }
 
+/* ===== 진입 퍼널 (기획안 1장 Phase 1~4) =====
+   글래스모피즘 + 프라이빗 뱅킹 톤. 색은 전부 브랜드 토큰에서 파생. */
+
+.funnel-shell {
+  max-width: 600px;
+  margin: 0 auto;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
+  background:
+    radial-gradient(120% 60% at 50% -10%, rgba(115, 146, 228, 0.25), transparent 60%),
+    var(--bg-color);
+}
+
+/* Phase 1: 소셜프루프 토스트 */
+.funnel-toast {
+  position: sticky;
+  top: 8px;
+  z-index: 10;
+  margin: 0 auto 8px;
+  padding: 10px 16px;
+  max-width: 100%;
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  background: rgba(244, 239, 216, 0.08);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.funnel-toast.show { opacity: 1; transform: translateY(0); }
+
+/* 채팅 영역 */
+.funnel-chat {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 2px;
+}
+
+/* 5070 대상: 글자 크게, 행간 넉넉히 (한글 행간 1.3 이상 — vault 고정값) */
+.funnel-bubble {
+  max-width: 85%;
+  padding: 14px 18px;
+  font-size: 1.08rem;
+  line-height: 1.6;
+  border-radius: 20px;
+  animation: fadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.funnel-bubble.bot {
+  align-self: flex-start;
+  color: var(--text-primary);
+  background: rgba(244, 239, 216, 0.07);
+  border: 1px solid var(--border-color);
+  border-top-left-radius: 6px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.funnel-bubble.user {
+  align-self: flex-end;
+  color: var(--bg-color);
+  background: var(--primary);
+  border-top-right-radius: 6px;
+  font-weight: 600;
+}
+
+.funnel-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.15em;
+  background: var(--primary);
+  animation: caretBlink 0.8s steps(1) infinite;
+}
+@keyframes caretBlink { 50% { opacity: 0; } }
+
+/* Phase 3~4: 가로 스와이프 칩 */
+.funnel-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 10px 2px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+.funnel-chips::-webkit-scrollbar { display: none; }
+
+.funnel-chip {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  padding: 13px 18px;
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: rgba(244, 239, 216, 0.08);
+  border: 1px solid var(--border-highlight);
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.funnel-chip:active { transform: scale(0.94); background: rgba(254, 228, 162, 0.2); }
+.funnel-chip:disabled { opacity: 0.45; }
+
+/* 입력바: 칩이 자동 타이핑하는 곳 */
+.funnel-inputbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  background: rgba(244, 239, 216, 0.06);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.funnel-input {
+  flex: 1;
+  min-height: 1.5em;
+  padding: 10px 12px;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+  outline: none;
+}
+.funnel-input.empty { color: var(--text-muted); }
+
+.funnel-send {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--bg-color);
+  background: var(--primary);
+  border-radius: 50%;
+  transition: opacity 0.15s;
+}
+.funnel-send:disabled { opacity: 0.35; }
+
