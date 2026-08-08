@@ -834,7 +834,7 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
      네이비 오버레이 — 텍스처는 살리고 크림 글자 대비는 지킨다 */
   background:
     linear-gradient(165deg, rgba(30, 41, 95, 0.78) 0%, rgba(30, 41, 95, 0.9) 80%),
-    url('/bg-warm.png') center / cover;
+    url('/bg-warm.jpg') center / cover; /* 원본 2.1MB → 37KB 압축본 (원본은 vault raw/brand/gen) */
   border: 1px solid rgba(254, 228, 162, 0.5);
   border-radius: 18px;
   padding: 28px 24px;
