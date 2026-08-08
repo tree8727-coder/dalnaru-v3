@@ -155,6 +155,18 @@ export default function EntryFunnel() {
       const g = new URLSearchParams(window.location.search).get('g');
       if (g) gift.current = JSON.parse(decodeURIComponent(escape(atob(g))));
     } catch { gift.current = null; }
+    // 안내데스크의 "지난번 이력서 다시 보기"로 온 경우 — 바로 결과 화면 복원
+    if (new URLSearchParams(window.location.search).get('view') === '1') {
+      try {
+        const done = JSON.parse(localStorage.getItem('dalnaru_done') ?? 'null');
+        if (done?.answers?.field) {
+          setAnswers(done.answers);
+          setStage('result');
+          later(() => botSay('다시 오셨네요! 지난번에 만드신 이력서입니다. 공고 추천도 새로 찾아 두었습니다.'), 400);
+          return;
+        }
+      } catch { /* 무시 */ }
+    }
     if (gift.current?.from) {
       const gf = gift.current;
       record('gift-opened', `${gf.to ?? ''}/${gf.field ?? '분야미상'}`);
@@ -277,9 +289,14 @@ export default function EntryFunnel() {
     if (shown) setMessages((m) => [...m, { role: 'user', text: shown }]);
 
     if (stage === 'name') {
-      setAnswers((a) => ({ ...a, name: label.trim() }));
+      const done: Answers = { ...answers, name: label.trim() };
+      setAnswers(done);
       record('성함', label.trim() ? '(입력함)' : '(건너뜀)', true); // 이름 원문은 이력서에만
       localStorage.removeItem(STORE_KEY); // 완주 — 이어하기 데이터 정리
+      // 완성본을 로컬에 보관 — 재방문 시 안내데스크가 알아보고 다시 보여줄 수 있게
+      try {
+        localStorage.setItem('dalnaru_done', JSON.stringify({ answers: done, giftFrom: gift.current?.from ?? null }));
+      } catch { /* 무시 */ }
       later(() => {
         setStage('result');
         botSay('완성됐습니다! 기업에 바로 제출할 수 있는 형식으로 정리했고, 맞는 일자리도 함께 찾아 두었습니다. 공고를 누르면 그 공고에 맞춰 이력서가 다시 정렬됩니다.');
@@ -502,6 +519,10 @@ export default function EntryFunnel() {
               </a>
             )}
             <JobMatches matches={matches} selectedId={selectedJob} onSelect={setSelectedJob} sourceLabel={jobResult?.label ?? '공고 불러오는 중…'} />
+
+            {/* 유기적 연결: 선물로 온 분은 보낸 자녀에게 회신, 아니면 동년배 전파 */}
+            <ShareRow giftFrom={gift.current?.from ?? null} onShare={(kind) => record('share-' + kind, '복사')} />
+
             <button className="funnel-restart" onClick={restart}>처음부터 다시</button>
             <p className="funnel-privacy">
               응답 내용은 이름을 뺀 익명 자료로 저장되어 시니어 일자리·업계 연구와 서비스 개선에
@@ -560,6 +581,36 @@ export default function EntryFunnel() {
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+/** 완성 후 전파: 선물 회신(자녀에게) 또는 동년배 소개 — 카톡 텍스트 복사 */
+function ShareRow({ giftFrom, onShare }: { giftFrom: string | null; onShare: (kind: string) => void }) {
+  const [copied, setCopied] = useState<string | null>(null);
+  const copy = (kind: string, text: string) => {
+    void navigator.clipboard?.writeText(text);
+    setCopied(kind);
+    onShare(kind);
+    setTimeout(() => setCopied(null), 2200);
+  };
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  return (
+    <div className="funnel-actions" style={{ marginTop: 10 }}>
+      {giftFrom && (
+        <button
+          className="funnel-chip frontdesk-chip"
+          onClick={() => copy('back', `${giftFrom}아(야), 고맙다. 네가 보내준 걸로 이력서 만들었다. 아버지(어머니) 아직 쓸 만하지? 허허.`)}
+        >
+          {copied === 'back' ? '✓ 복사됐습니다 — 카톡에 붙여넣으세요' : `💌 ${giftFrom}님께 완성 소식 보내기`}
+        </button>
+      )}
+      <button
+        className="funnel-chip frontdesk-chip"
+        onClick={() => copy('peer', `나 이걸로 이력서 만들었는데 3분밖에 안 걸리더라고. 버튼만 누르면 돼. 자네도 한번 해봐.\n${origin}`)}
+      >
+        {copied === 'peer' ? '✓ 복사됐습니다 — 카톡에 붙여넣으세요' : '👥 친구분께 알려주기'}
+      </button>
     </div>
   );
 }

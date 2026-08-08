@@ -71,9 +71,16 @@ export default function FrontDesk() {
     later(tick, 14);
   }, [later]);
 
+  const [hasDone, setHasDone] = useState(false); // 완성 이력서 보유자 — 알아보고 맞이한다
+
   useEffect(() => {
+    let returning = false;
+    try { returning = !!JSON.parse(localStorage.getItem('dalnaru_done') ?? 'null')?.answers?.field; } catch { /* 무시 */ }
+    setHasDone(returning);
     later(() => botSay(
-      '어서 오세요, 달나루입니다. 서강대 연구실에서 시작한 5060 경력 서비스예요. 오늘은 무슨 일로 오셨어요?',
+      returning
+        ? '다시 오셨네요, 반갑습니다! 지난번 이력서 다시 보실래요, 아니면 다른 일 도와드릴까요?'
+        : '어서 오세요, 달나루입니다. 서강대 연구실에서 시작한 5060 경력 서비스예요. 오늘은 무슨 일로 오셨어요?',
       () => setChipsOn(true),
     ), 400);
     // 다음 페이지들이 즉시 뜨도록 미리 로드
@@ -110,6 +117,16 @@ export default function FrontDesk() {
       </div>
 
       <div className="funnel-chips" role="group" aria-label="용건 선택">
+        {hasDone && (
+          <button
+            key="view"
+            className="funnel-chip frontdesk-chip"
+            disabled={!chipsOn}
+            onClick={() => pick({ chip: '📄 지난번 만든 이력서 다시 보기', ack: '네, 바로 꺼내드릴게요. 공고 추천도 새로 찾아 두겠습니다.', href: '/funnel?view=1' })}
+          >
+            📄 지난번 만든 이력서 다시 보기
+          </button>
+        )}
         {DOORS.map((d) => (
           <button key={d.href} className="funnel-chip frontdesk-chip" disabled={!chipsOn} onClick={() => pick(d)}>
             {d.chip}
