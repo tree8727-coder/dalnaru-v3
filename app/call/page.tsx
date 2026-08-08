@@ -25,6 +25,8 @@ interface CallCard {
   prepare: string[];
   note?: string;
   cta?: 'calc' | 'funnel';
+  nextSteps?: string[]; // 통화 이후의 전체 순서 (긴급 건은 카드에 바로 노출)
+  escalate?: string;    // "잘 안 됐어요"일 때의 다음 수
 }
 
 interface Category {
@@ -41,6 +43,7 @@ const CARDS: Record<string, CallCard> = {
     prepare: ['주민등록번호', '조용한 곳에서 통화'],
     note: '전화 전에 1분 계산기로 대략 값을 잡아가면 상담이 훨씬 빨라집니다.',
     cta: 'calc',
+    escalate: '통화가 어려우면 가까운 국민연금공단 지사에 신분증 들고 방문하시면 그 자리에서 확인해 줍니다.',
   },
   health: {
     id: 'health', number: '1577-1000', org: '국민건강보험공단',
@@ -48,6 +51,7 @@ const CARDS: Record<string, CallCard> = {
     script: '"퇴직 후 보험료가 갑자기 올라서요. 지역가입 전환 내용과 조정 방법을 알고 싶습니다."',
     prepare: ['고지서', '퇴직 시기'],
     note: '"임의계속가입"을 꼭 물어보세요 — 퇴직 후 2년은 직장 때 보험료로 유지할 수 있습니다.',
+    escalate: '설명이 어려우면 가까운 건보공단 지사 방문이 낫습니다. 고지서 들고 가시면 됩니다.',
   },
   welfare: {
     id: 'welfare', number: '129', org: '보건복지상담센터',
@@ -74,14 +78,21 @@ const CARDS: Record<string, CallCard> = {
     script: '"실업급여 받을 수 있는 조건인지 확인하고 싶습니다." 또는 "중장년 일자리 지원을 알아보고 있습니다."',
     prepare: ['퇴직 시기와 근무 기간 메모'],
     note: '이력서가 필요하다고 하면 — 여기서 3분이면 만듭니다.',
+    escalate: '가까운 고용센터에 방문하면 담당자가 앉아서 같이 봐줍니다. 신분증만 챙기세요.',
     cta: 'funnel',
   },
   phishing: {
     id: 'phishing', number: '112', org: '경찰 (즉시)',
     ack: '잘하셨습니다. 일단 끊으신 것만으로 절반은 막으신 겁니다.',
     script: '"방금 의심스러운 전화(문자)를 받았습니다. 돈은 아직 안 보냈습니다 / 보냈습니다."',
-    prepare: ['이미 보냈다면 은행 콜센터에 즉시 지급정지 요청', '금융감독원 1332도 도움'],
-    note: '어떤 기관도 전화로 이체나 앱 설치를 요구하지 않습니다.',
+    prepare: ['보낸 계좌번호·금액·시각 메모 (통장 앱에서 확인)'],
+    note: '어떤 기관도 전화로 이체나 앱 설치를 요구하지 않습니다. 돈을 보냈다면 10분 안의 신고가 환급률을 좌우합니다.',
+    nextSteps: [
+      '지금 즉시 — 112 또는 거래 은행 콜센터에 "지급정지 요청" (24시간 가능, 금감원 1332도 됨)',
+      '오늘 중 — 가까운 경찰서 민원실에서 「사건사고 사실확인원」 발급',
+      '3영업일 안 — 그 서류를 은행에 내고 피해구제 신청 (환급까지 통상 2~3개월)',
+    ],
+    escalate: '지급정지가 안 받아들여지면 금융감독원 1332로 다시 거세요. 그래도 막히면 경찰서에 직접 방문하는 게 가장 확실합니다.',
   },
   power: {
     id: 'power', number: '123', org: '한국전력 (한전)',
@@ -167,6 +178,8 @@ export default function CallPage() {
   const [card, setCard] = useState<CallCard | null>(null);
   const [chipsOn, setChipsOn] = useState(false);
   const [unknownText, setUnknownText] = useState('');
+  const [outcome, setOutcome] = useState<null | 'ok' | 'fail'>(null); // 통화 후 후속
+  const [copied, setCopied] = useState(false);
   const [fontLarge, setFontLarge] = useState(false);
   const session = useRef({ id: newSessionId(), startedAt: Date.now(), steps: [] as FunnelStep[] });
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -228,6 +241,8 @@ export default function CallPage() {
     setChipsOn(false);
     setMessages((m) => [...m, { role: 'user', text: f.chip }]);
     record('topic', f.chip);
+    setOutcome(null);
+    setCopied(false);
     botSay(`${f.card.ack} 아래에 번호와 하실 말씀을 준비해 드렸습니다. 그대로 읽으셔도 됩니다.`, () => {
       setCard(f.card);
       setStage('card');
@@ -247,7 +262,7 @@ export default function CallPage() {
   };
 
   const reset = () => {
-    setCard(null); setCat(null); setStage('triage'); setChipsOn(false);
+    setCard(null); setCat(null); setStage('triage'); setChipsOn(false); setOutcome(null); setCopied(false);
     botSay('또 궁금한 일 있으세요?', () => setChipsOn(true));
   };
 
@@ -284,6 +299,49 @@ export default function CallPage() {
               </ul>
             </div>
             {card.note && <p className="guide-why">💡 {card.note}</p>}
+
+            {/* 긴급 건은 전체 순서를 바로 — 소개가 아니라 완주를 시킨다 */}
+            {card.nextSteps && (
+              <div className="call-section">
+                <div className="call-label">전체 순서 — 이 순서만 따라가면 됩니다</div>
+                <ol className="call-steps">
+                  {card.nextSteps.map((s) => <li key={s}>{s}</li>)}
+                </ol>
+              </div>
+            )}
+
+            {/* 이 안내를 카톡으로 — 부모님께 보내는 전파 단위 */}
+            <button
+              className="funnel-chip"
+              style={{ marginTop: 12 }}
+              onClick={() => {
+                const txt = `[달나루 전화 안내]\n📞 ${card.number} (${card.org})\n\n이렇게 말씀하세요:\n${card.script}\n\n준비물: ${card.prepare.join(', ')}` +
+                  (card.nextSteps ? `\n\n전체 순서:\n${card.nextSteps.map((s, i) => `${i + 1}. ${s}`).join('\n')}` : '');
+                void navigator.clipboard?.writeText(txt);
+                setCopied(true);
+                record('share', card.id);
+                setTimeout(() => setCopied(false), 2000);
+              }}
+            >
+              {copied ? '✓ 복사됐습니다 — 카톡에 붙여넣으세요' : '💬 이 안내 카톡으로 보내기'}
+            </button>
+
+            {/* 통화 후 후속 — 소개로 끝내지 않고 해결까지 따라간다 */}
+            <div className="call-section">
+              <div className="call-label">통화해 보셨어요?</div>
+              {outcome === null ? (
+                <div className="funnel-chips" style={{ padding: '4px 0' }}>
+                  <button className="funnel-chip" onClick={() => { setOutcome('ok'); record('outcome-' + card.id, '해결'); }}>😊 잘 해결됐어요</button>
+                  <button className="funnel-chip" onClick={() => { setOutcome('fail'); record('outcome-' + card.id, '미해결'); }}>😥 잘 안 됐어요</button>
+                </div>
+              ) : outcome === 'ok' ? (
+                <p className="call-script">다행입니다! 또 궁금한 게 생기면 언제든 오세요.</p>
+              ) : (
+                <p className="guide-why">
+                  💪 {card.escalate ?? '그럴 땐 110(정부민원안내)에 상황을 그대로 말씀하시면 담당 기관을 다시 찾아 연결해 줍니다. 가까운 주민센터 방문도 확실한 방법입니다.'}
+                </p>
+              )}
+            </div>
             {card.cta === 'calc' && (
               <Link href="/calc" className="btn-primary calc-cta-btn" style={{ marginTop: 14 }}>🧮 전화 전에 1분 계산해 보기</Link>
             )}

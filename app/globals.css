@@ -730,6 +730,8 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
 .call-section { margin-top: 14px; }
 .call-label { font-size: 0.85rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 6px; }
 .call-script { font-size: 1.05rem; line-height: 1.6; color: var(--text-primary); font-weight: 600; }
+.call-steps { margin: 0; padding-left: 22px; }
+.call-steps li { font-size: 1rem; line-height: 1.6; color: var(--text-primary); margin-bottom: 8px; font-weight: 600; }
 
 /* ===== 지급 후 업그레이드 (자유 서술) ===== */
 .enrich-wrap { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
@@ -828,7 +830,11 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
 
 /* ===== 회고 카드 (가족 선물용 — 감성 네이비+골드) ===== */
 .memoir-card {
-  background: linear-gradient(165deg, #22306b 0%, var(--bg-color) 75%);
+  /* 수채 텍스처(힉스필드 생성, 비브랜드 장식 — brand-visual-log 기록) 위에
+     네이비 오버레이 — 텍스처는 살리고 크림 글자 대비는 지킨다 */
+  background:
+    linear-gradient(165deg, rgba(30, 41, 95, 0.78) 0%, rgba(30, 41, 95, 0.9) 80%),
+    url('/bg-warm.png') center / cover;
   border: 1px solid rgba(254, 228, 162, 0.5);
   border-radius: 18px;
   padding: 28px 24px;

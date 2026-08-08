@@ -114,20 +114,7 @@ export const GUIDES: GuideRecipe[] = [
     aiPrompt: '다음 영수증을 읽고 날짜, 금액, 사용처를 [2026-08-08 * 식대 50000] 형태로 바꿔줘.',
     repo: 'simonmichael/hledger', stars: '4.6천',
   },
-  {
-    id: 'dev', goalChip: '개발 환경 갖추기', icon: '⚡',
-    title: '폴더 순간이동 + 빠른 검색 세트',
-    oneLiner: '탐색기 클릭 없이 원하는 폴더로 바로 이동하고, 무엇이든 0.1초에 찾습니다.',
-    whyBest: '개발 속도를 가장 확실히 올려주는 기본기 조합(별 8.2만)이라 골랐습니다.',
-    easySteps: [
-      '이 항목은 개발 경험이 있는 분께 권합니다',
-      '설치 후 폴더 이름 일부만 쳐도 바로 이동됩니다',
-      '깃 관리는 lazygit, 터미널 꾸미기는 starship을 이어서 보세요',
-    ],
-    installCmd: 'winget install junegunn.fzf\nwinget install ajeetdsouza.zoxide',
-    runCmd: 'z 내프로젝트',
-    aiPrompt: '(개발 속도를 올려주는 기본 유틸리티 세트입니다)',
-    repo: 'junegunn/fzf', stars: '8.2만',
-  },
+  // 빼기(2026-08-08): 개발 환경 항목 제거 — 5060 눈높이 대상이 아님.
+  // 개발자용 도구는 tools.html(WorkflowHub v7 전체 랭킹)에서만 제공한다.
 ];
 
