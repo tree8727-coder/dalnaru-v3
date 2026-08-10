@@ -185,7 +185,8 @@ export default function GuidePage() {
         )}
 
         <p className="calc-source">
-          추천 근거(사용자 수·검증 뱃지)는 2026-08-07 GitHub·Winget 실측값입니다. 전부 무료·오픈소스입니다.
+          추천 근거(사용자 수·검증 뱃지)는 2026-08-10 GitHub·Winget 실측값입니다.
+          내려받아 쓰는 것은 전부 무료·오픈소스이고, 가입이 필요한 것은 「시장·경쟁 조사」 하나뿐입니다(무료 한도 있음).
         </p>
       </div>
     </div>
