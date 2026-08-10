@@ -1,0 +1,26 @@
+rules_version = '2';
+
+// 달나루 Firestore 규칙.
+// 배경: 2026-08-10 공개 배포(dalnaru.vercel.app) 시점에 DB가 전체 공개 읽기 상태였다.
+// funnel_sessions에는 사용자의 경력·자유서술(암묵지)이 들어가므로 열람을 막는다.
+// 팀은 Firebase 콘솔/Admin SDK로 본다 — 그 경로는 규칙을 우회하므로 영향 없다.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 퍼널 응답: 클라이언트는 쓰기 전용. 남의 세션을 읽거나 지울 수 없다.
+    match /funnel_sessions/{sessionId} {
+      allow create, update: if request.resource.data.keys().hasOnly(['steps', 'done', 'updatedAt']);
+      allow read, delete: if false;
+    }
+
+    // v1 잔재(북마크). 로그인한 본인 문서만.
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
