@@ -182,7 +182,22 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   color: var(--primary);
 }
 .frontdesk-chip { width: 100%; text-align: left; font-size: 1.1rem; padding: 16px 20px; }
-.gift-link { display: inline-block; margin-top: 8px; color: var(--accent); text-decoration: underline; font-weight: 600; }
+/* 밑줄 텍스트 링크는 시니어가 버튼으로 인지하지 못한다(토스 730만 조사 1번 항목).
+   높이 20px → 48px 버튼 형태로. */
+.gift-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  margin-top: 8px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  text-decoration: none;
+}
 .gift-input {
   width: 100%;
   padding: 12px 14px;
@@ -204,9 +219,11 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   word-break: break-all;
 }
 .font-toggle {
+  /* 글자를 키우는 버튼이 화면에서 가장 작았다(118×40, 14.4px) — 접근성 진입점부터 기준 준수 */
   flex: 0 0 auto;
-  padding: 8px 14px;
-  font-size: 0.9rem;
+  min-height: 48px;
+  padding: 12px 18px;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--text-primary);
   background: rgba(244, 239, 216, 0.1);
@@ -365,7 +382,7 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
 .resume-target {
   padding: 8px 12px;
   margin-bottom: 14px;
-  font-size: 0.88rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #1E295F;
   background: #FFF7E0;
@@ -387,11 +404,11 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   line-height: 1.3; /* 한글 제목 행간 1.3 이상 — vault 고정값 */
   color: #111;
 }
-.resume-headline { font-size: 0.98rem; color: #444; margin-top: 4px; }
+.resume-headline { font-size: 1rem; color: #444; margin-top: 4px; }
 .resume-title-badge {
   flex: 0 0 auto;
   padding: 6px 12px;
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 800;
   color: #1E295F;
   background: #F2F0E4;
@@ -400,7 +417,7 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   white-space: nowrap;
 }
 .resume-h {
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   color: #1E295F;
@@ -408,13 +425,13 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   padding-left: 8px;
   margin-bottom: 8px;
 }
-.resume-doc p { font-size: 0.95rem; line-height: 1.65; color: #222; }
+.resume-doc p { font-size: 1rem; line-height: 1.65; color: #222; }
 .resume-ul { margin: 0; padding-left: 0; list-style: none; }
 .resume-ul li {
   position: relative;
   padding-left: 18px;
   margin-bottom: 6px;
-  font-size: 0.95rem;
+  font-size: 1rem;
   line-height: 1.55;
   color: #222;
 }
@@ -426,7 +443,7 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   font-size: 0.6rem;
   color: #1E295F;
 }
-.resume-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.resume-table { width: 100%; border-collapse: collapse; font-size: 1rem; }
 .resume-table th {
   width: 92px;
   text-align: left;
@@ -444,12 +461,12 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   margin-bottom: 6px;
 }
 .resume-apply { margin-top: 8px; font-weight: 600; color: #1E295F; }
-.resume-blank { color: #b5b0a0; font-size: 0.88rem; }
-.resume-fillin { color: #8a8a8a; font-size: 0.88rem; }
+.resume-blank { color: #857f6b; font-size: 1rem; }
+.resume-fillin { color: #666666; font-size: 1rem; }  /* 3.45:1 -> 5.7:1 */
 .resume-formnote {
   text-align: center;
-  font-size: 0.78rem !important;
-  color: #999 !important;
+  font-size: 1rem !important;
+  color: #555 !important;  /* 2.85:1 -> 7.5:1 */
   margin: -8px 0 12px;
 }
 .resume-doctitle {
@@ -467,8 +484,8 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   margin-top: 20px;
   padding-top: 10px;
   border-top: 1px solid #e5e5e5;
-  font-size: 0.75rem;
-  color: #999;
+  font-size: 1rem;
+  color: #555;
 }
 .resume-foot-brand { font-weight: 800; color: #1E295F; letter-spacing: 0.06em; }
 
@@ -498,7 +515,7 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   -webkit-backdrop-filter: blur(12px);
 }
 .resume-gaugebar .funnel-gauge { margin-top: 8px; }
-.resume-gaugebar-hint { float: right; font-weight: 400; color: var(--text-secondary); font-size: 0.82rem; }
+.resume-gaugebar-hint { float: right; font-weight: 400; color: var(--text-secondary); font-size: 1rem; }
 
 /* 티저(완성 예시) */
 .resume-teaser {
@@ -508,12 +525,14 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   filter: brightness(0.97);
 }
 .profile-teaser-label {
+  /* "완성 예시" 라벨 — 예시를 내 이력서로 착각하는 문제(토스 2번 항목)의 방어선.
+     12.5px로는 라벨 역할을 못 한다. */
   position: absolute;
-  top: -8px;
+  top: -12px;
   left: 10px;
   z-index: 2;
-  padding: 4px 12px;
-  font-size: 0.78rem;
+  padding: 5px 14px;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--bg-color);
   background: var(--primary);
@@ -613,7 +632,7 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
 }
 .calc-btn:active { background: var(--primary-hover); }
 .calc-value { flex: 1; text-align: center; font-size: 1.5rem; font-weight: 800; color: var(--text-primary); }
-.calc-unit { font-size: 0.9rem; font-weight: 400; color: var(--text-secondary); margin-left: 4px; }
+.calc-unit { font-size: 1rem; font-weight: 400; color: var(--text-secondary); margin-left: 4px; }
 .chip-on { background: rgba(254, 228, 162, 0.25); border-color: var(--primary); }
 .calc-result {
   padding: 18px 16px;
@@ -628,14 +647,14 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
 .calc-verdict-sub strong { color: var(--primary); }
 .calc-bars { display: flex; flex-direction: column; gap: 6px; margin-top: 16px; }
 .calc-bar-row { display: flex; align-items: center; gap: 8px; }
-.calc-bar-age { flex: 0 0 44px; font-size: 0.85rem; color: var(--text-secondary); text-align: right; }
+.calc-bar-age { flex: 0 0 52px; font-size: 1rem; color: var(--text-secondary); text-align: right; }
 .calc-bar-track { flex: 1; height: 14px; border-radius: 999px; background: rgba(244, 239, 216, 0.1); overflow: hidden; }
 .calc-bar-fill { height: 100%; border-radius: 999px; background: var(--primary); }
 .calc-bar-fill.minus { background: var(--danger); }
-.calc-bar-val { flex: 0 0 92px; font-size: 0.82rem; color: var(--text-secondary); }
+.calc-bar-val { flex: 0 0 108px; font-size: 1rem; color: var(--text-secondary); }
 .calc-cta { margin-top: 16px; }
 .calc-cta-btn { text-align: center; }
-.calc-source { font-size: 0.78rem; line-height: 1.6; color: var(--text-muted); }
+.calc-source { font-size: 1rem; line-height: 1.6; color: var(--text-muted); }
 
 /* ===== 워크플로우 가이드 ===== */
 .guide-head { display: flex; gap: 12px; align-items: flex-start; }
@@ -711,12 +730,20 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   border-radius: 10px;
 }
 .guide-needs-link {
+  /* 밑줄 링크(높이 20px)는 시니어가 버튼으로 못 알아본다 — 버튼 형태·48px */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
   margin-top: 14px;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  text-decoration: underline;
-  text-align: left;
-  padding: 0;
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  border: 1.5px solid var(--border-highlight);
+  border-radius: 10px;
+  text-decoration: none;
+  text-align: center;
 }
 .guide-thanks { margin-top: 14px; font-size: 0.88rem; font-weight: 700; color: var(--primary); }
 .guide-links { display: flex; gap: 16px; margin-top: 16px; }
