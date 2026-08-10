@@ -1,5 +1,52 @@
 # 달나루 프로젝트 핸드오버
 
+## 2026-08-10 · 공개 배포 + DB 잠금 + 가이드 실측 정정 (Claude Code)
+
+**앱이 공개됐다: https://dalnaru.vercel.app** (Vercel 프로덕션, `dalnaru` 프로젝트)
+
+**바꾼 것**
+
+| 무엇 | 파일 | 한 줄 |
+| --- | --- | --- |
+| Firestore 규칙 | `firestore.rules`, `firebase.json` | `funnel_sessions` 쓰기 전용. 읽기·삭제 차단 |
+| 공유 카드(OG) | `app/layout.tsx`, `public/og.png`, `public/og-source.html` | 카톡·밴드 링크 미리보기 |
+| 검색 노출 | `app/robots.ts`, `app/sitemap.ts` | 색인 경로 |
+| 가이드 데이터 | `lib/guideData.ts` | 실패하는 명령 2건·부풀린 별 수 1건 정정 + 2종 추가 |
+| 데이터 검사 | `scripts/check-guide.mjs` (`npm run check:guide`) | 설치 ID·별 수 실측 대조 |
+| 칩 잘림 | `app/globals.css` | `calc-shell` 안에서 칩 상자 높이 뚜껑 해제 |
+
+**왜**
+
+1. **배포를 먼저 했다.** 로컬에만 있으면 트래픽 0이고, 트래픽 0이면 수집 데이터도 0이다.
+   미리보기 배포는 버렸다 — 링크가 임시라 카톡으로 돌릴 수 없으면 배포한 의미가 없다.
+
+2. **배포하자마자 DB가 전체 공개 읽기였다.** Firebase 웹 키는 클라이언트 번들에 그대로
+   들어가므로, 공개 URL이 생긴 순간 누구나 남의 자유서술(성과 일화·전수 노하우)을
+   내려받을 수 있는 상태였다. 규칙을 잠갔다. **팀 열람은 콘솔·Admin SDK가 규칙을 우회해
+   그대로 된다.** `saveFunnel`이 실패를 localStorage로 삼키기 때문에 규칙 배포 후
+   쓰기부터 확인했다 — 쓰기 200 / 읽기 403 / 스키마 밖 필드 403 실측.
+
+3. **가이드는 "25종 확장" 대신 사실부터 고쳤다.** `winget install hledger`(패키지 없음),
+   `npm i -g @mendable/firecrawl-cli`(npm 404), ImageMagick 별 4.4만(실제 1.7만)이
+   라이브였다. 5060 대상에서 붙여넣은 명령이 실패하면 신뢰가 먼저 깨진다.
+   tools.html 실데이터는 25종이 아니라 12종이고 그중 개발자용은 이미 뺀 항목이라,
+   winget으로 확인되는 비개발자용 2종(Ollama·Pandoc)만 더했다.
+
+**버린 선택지** — n8n(별 19.9만)·Stirling-PDF. 좋은 도구지만 winget 패키지가 없어
+설치가 npm/Docker다. 같은 실패를 다시 만든다. `public/tools.html` 랭킹에는 그대로 있다.
+
+**사람이 확인할 것**
+
+1. **워크넷 키는 Vercel 환경변수에도 넣어야 한다.** `.env.local`은 로컬 전용이다.
+   로컬에서 실공고가 떠도 배포본은 예시 공고를 계속 쓴다.
+2. **`leads` 컬렉션은 이제 막혀 있다.** v1 모달 리드 수집(아래 옛 문서 3절)을 되살리면
+   쓰기가 실패한다. 되살릴 거면 `firestore.rules`에 규칙을 먼저 추가할 것.
+3. **가이드에 도구를 추가하기 전 `npm run check:guide`.** 통과 못 하면 넣지 않는다.
+   화면의 "MS 검증" 배지는 모든 레시피가 winget 패키지라는 전제에 기대고 있다 —
+   winget에 없는 도구를 넣는 순간 그 배지가 거짓이 된다.
+4. **커스텀 도메인.** `*.vercel.app`은 기관 제휴 자료에 쓰기엔 임시 냄새가 난다.
+5. OG 카드 문구를 고치려면 `public/og-source.html`을 열어 1200×630으로 다시 캡처한다.
+
 ## 2026-08-10 · 수집 동의 문구에 "통계 작성" 목적 명시 (Claude Code)
 
 **바꾼 것** — 문구 3곳 + 로그 문자열 1곳. 로직·수집 항목은 안 건드림.
