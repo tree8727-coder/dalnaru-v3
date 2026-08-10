@@ -1,73 +1,94 @@
-export interface CertData {
-  id: string;
-  n: string;
-  d: number;
-  p: number;
-  dens: number;
-  gap?: number;
-  yoy?: number;
+/**
+ * 중장년 국가기술자격 취업 성과.
+ *
+ * 출처 — 고용노동부·한국직업능력연구원, 2020~2024년 5년간
+ *        자격 취득 당시 실업 상태였던 중장년 24만 명 분석 (2025-09 공표)
+ *
+ * 왜 이 데이터인가:
+ *   인터넷이 5060에게 미는 자격증(지게차·요양보호사·공인중개사)과
+ *   실제로 취업으로 이어진 자격증이 다르다. 학원비는 미리 나가고
+ *   결과는 6개월 뒤에 나오므로, 순서를 바꾸면 시간과 돈을 아낄 수 있다.
+ *
+ * 원칙 — 여기 없는 숫자는 지어내지 않는다. rate6m: null 은 "공표 데이터에 없음"이며
+ *        화면에서도 "확인되지 않음"으로 표시한다. 추정치를 넣는 순간 이 파일의 값이 사라진다.
+ */
+
+export const CERT_SOURCE = {
+  by: '고용노동부 · 한국직업능력연구원',
+  what: '2020~2024년 자격 취득 당시 실업 상태였던 중장년 24만 명 추적',
+  when: '2025년 9월 공표',
+  metric: '자격 취득 후 6개월 이내 취업률',
+} as const;
+
+export interface CertOutcome {
+  /** 국가기술자격 종목명 */
+  name: string;
+  /** 취득 후 6개월 내 취업률(%). null = 공표 데이터에 없음 */
+  rate6m: number | null;
+  /** 취업 시 월평균 임금(만원). null = 공표 데이터에 없음 */
+  payMonthly: number | null;
+  /** 인터넷 추천 글에 자주 등장하는가 — 기대와 현실의 간격을 보기 위한 표시 */
+  hyped?: boolean;
+  note?: string;
 }
 
-export const certRawData: CertData[] = [
- {id: 'c1', n:"산업안전기사",d:163.2,p:184.5,dens:34315},
- {id: 'c2', n:"사회복지사2급",d:108.8,p:123.2,dens:191789},
- {id: 'c3', n:"요양보호사",d:96.5,p:103.5,dens:109591},
- {id: 'c4', n:"정보처리기사",d:79.7,p:111.6,dens:55645},
- {id: 'c5', n:"주택관리사",d:79.0,p:93.4,dens:33414},
- {id: 'c6', n:"전기기사",d:73.2,p:96.8,dens:57554},
- {id: 'c7', n:"공인중개사",d:72.4,p:111.9,dens:420745},
- {id: 'c8', n:"전기기능사",d:70.8,p:75.9,dens:39921},
- {id: 'c9', n:"컴퓨터활용능력",d:45.6,p:58.3,dens:114995},
- {id: 'c10', n:"소방설비기사",d:45.0,p:57.3,dens:25354},
- {id: 'c11', n:"산업안전산업기사",d:43.5,p:60.2,dens:13389},
- {id: 'c12', n:"경비지도사",d:30.5,p:38.1,dens:18893},
- {id: 'c13', n:"물류관리사",d:30.0,p:43.4,dens:17196},
- {id: 'c14', n:"조경기능사",d:29.0,p:37.5,dens:8600},
- {id: 'c15', n:"위험물기능사",d:28.2,p:36.1,dens:4745},
- {id: 'c16', n:"청소년상담사",d:24.5,p:35.5,dens:27421},
- {id: 'c17', n:"임상심리사2급",d:23.7,p:31.7,dens:10891},
- {id: 'c18', n:"직업상담사",d:23.3,p:33.7,dens:83118},
- {id: 'c19', n:"건축기사",d:20.3,p:32.0,dens:37580},
- {id: 'c20', n:"한식조리기능사",d:19.8,p:22.4,dens:16190},
- {id: 'c21', n:"자동차정비기능사",d:17.4,p:23.0,dens:7643},
- {id: 'c22', n:"지게차운전기능사",d:16.3,p:32.2,dens:11795},
- {id: 'c23', n:"건축도장기능사",d:14.1,p:18.4,dens:7668},
- {id: 'c24', n:"가스기능사",d:14.1,p:20.5,dens:4087},
- {id: 'c25', n:"토목기사",d:14.0,p:19.9,dens:13756},
- {id: 'c26', n:"보육교사",d:13.0,p:18.8,dens:28557},
- {id: 'c27', n:"방수기능사",d:10.8,p:14.2,dens:6239},
- {id: 'c28', n:"전기공사기사",d:9.3,p:12.1,dens:10138},
- {id: 'c29', n:"굴착기운전기능사",d:8.2,p:9.0,dens:3995},
- {id: 'c30', n:"미용사",d:5.2,p:7.7,dens:145801},
- {id: 'c31', n:"제과기능사",d:5.2,p:7.7,dens:43820}
+/** 취업률이 확인된 종목 — 취업률 내림차순 */
+export const certOutcomes: CertOutcome[] = [
+  { name: '공조냉동기계기능사', rate6m: 54.3, payMonthly: null, note: '취업률 1위. 건물 냉난방·설비 유지보수' },
+  { name: '에너지관리기능사', rate6m: 53.8, payMonthly: null, note: '보일러·열관리. 시설관리 법정 선임 대상' },
+  { name: '산림기능사', rate6m: 52.6, payMonthly: null, note: '산림청·지자체 사업 연계' },
+  { name: '승강기기능사', rate6m: 51.9, payMonthly: null, note: '승강기 안전관리 법정 인력' },
+  { name: '전기기능사', rate6m: 49.8, payMonthly: null, hyped: true, note: '추천도 많고 실제 취업률도 상위' },
+
+  // 임금이 확인된 종목 — 취업률은 공표 목록에 없음
+  { name: '타워크레인운전기능사', rate6m: null, payMonthly: 369, note: '월임금 1위. 고소 작업이라 체력·건강검진 요건 확인 필요' },
+  { name: '천공기운전기능사', rate6m: null, payMonthly: 326, note: '건설 기초공사' },
+  { name: '불도저운전기능사', rate6m: null, payMonthly: 295, note: '건설 토목' },
 ];
 
-export const certData = certRawData.map(x => {
-  return {
-    ...x,
-    gap: +(x.d / Math.log10(x.dens + 10)).toFixed(1),
-    yoy: x.p > 0 ? +(((x.d - x.p) / x.p) * 100).toFixed(1) : 0,
-  };
-});
+/**
+ * 인터넷 추천 상위인데 위 공표 목록에 취업률이 없는 종목.
+ * "나쁘다"가 아니라 "확인된 숫자가 없다"는 뜻이다. 이 구분이 이 화면의 핵심이다.
+ */
+export const hypedWithoutData: string[] = [
+  '지게차운전기능사',
+  '요양보호사',
+  '사회복지사2급',
+  '공인중개사',
+  '주택관리사',
+  '한식조리기능사',
+];
 
-export const getCertStats = () => {
-  const mD = Math.max(...certData.map(x => x.d));
-  const mG = Math.max(...certData.map(x => x.gap || 0));
-  const mDens = Math.max(...certData.map(x => x.dens));
-  return { mD, mG, mDens };
-};
+/** 취업률이 확인된 종목 중 상위 n개 */
+export function topByRate(n = 5): CertOutcome[] {
+  return certOutcomes
+    .filter((c) => c.rate6m !== null)
+    .sort((a, b) => (b.rate6m as number) - (a.rate6m as number))
+    .slice(0, n);
+}
 
-export function getReadOut(x: CertData) {
-  const hiD = x.d >= 60;
-  const lowDens = x.dens < 20000;
-  const held = (x.yoy || 0) > -15;
-  let s = "";
-  if (hiD && lowDens) s = "찾는 사람은 많은데 정리된 정보가 적습니다. 근거를 스스로 모아야 하는 상태입니다.";
-  else if (hiD) s = "관심도 정보량도 많습니다. 정보는 충분하나 대부분 판매자가 만든 것일 수 있으니 출처를 확인하십시오.";
-  else if (lowDens && x.d < 20) s = "관심도 정보도 적습니다. 틈새이거나 수요 자체가 크지 않은 영역입니다.";
-  else s = "관심 대비 정보가 많은 편입니다. 정보 부족보다 선별이 과제입니다.";
-  
-  s += held ? " 다른 자격에 비해 관심이 잘 유지되고 있습니다."
-            : " 다만 다른 자격 대비 상대적 관심은 빠지는 추세입니다.";
-  return s;
+/** 임금이 확인된 종목 중 상위 n개 */
+export function topByPay(n = 3): CertOutcome[] {
+  return certOutcomes
+    .filter((c) => c.payMonthly !== null)
+    .sort((a, b) => (b.payMonthly as number) - (a.payMonthly as number))
+    .slice(0, n);
+}
+
+/**
+ * 한 종목에 대해 화면에 그대로 쓸 수 있는 한 문장.
+ * 없는 숫자를 있는 것처럼 말하지 않는다.
+ */
+export function readOut(name: string): string {
+  const hit = certOutcomes.find((c) => c.name === name);
+  if (hit?.rate6m != null) {
+    return `이 자격을 딴 중장년 100명 중 ${Math.round(hit.rate6m)}명이 6개월 안에 일을 찾았습니다.`;
+  }
+  if (hit?.payMonthly != null) {
+    return `취업하신 분들의 월평균 임금이 ${hit.payMonthly}만원입니다. 취업률은 공표된 자료에 없습니다.`;
+  }
+  if (hypedWithoutData.includes(name)) {
+    return '많이 추천되는 자격이지만, 중장년 취업률로 공표된 숫자는 아직 없습니다. 학원 설명만으로 정하지 마시고 채용 공고에서 이 자격을 실제로 요구하는지 먼저 확인해 보십시오.';
+  }
+  return '공표된 중장년 취업 통계에 없는 종목입니다.';
 }
