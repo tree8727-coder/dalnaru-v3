@@ -890,6 +890,29 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   border-radius: 10px;
 }
 .facts-input::placeholder { color: var(--text-muted); opacity: 0.75; }
+.facts-row { display: flex; gap: 8px; align-items: stretch; }
+.facts-row .facts-input { flex: 1; min-width: 0; }
+.facts-mic {
+  flex: 0 0 auto;
+  min-height: 52px;
+  min-width: 84px;              /* 44px 기준 + 라벨 폭 */
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--accent);
+  background: transparent;
+  color: var(--text-primary, #F4E7C3);
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: inherit;
+}
+.facts-mic.on {
+  background: var(--accent);
+  color: var(--bg-color);
+  animation: mic-pulse 1.2s ease-in-out infinite;
+}
+@keyframes mic-pulse { 50% { opacity: 0.6; } }
+@media (prefers-reduced-motion: reduce) { .facts-mic.on { animation: none; } }
+.facts-mic-err { margin: 0; font-size: 1rem; line-height: 1.55; color: #F0B9B9; }
 .facts-input:focus {
   outline: 3px solid var(--accent);
   outline-offset: 1px;

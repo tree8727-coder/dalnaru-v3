@@ -20,6 +20,7 @@
 
 import { useState } from 'react';
 import type { Answers } from '@/lib/funnelData';
+import { useSpeech } from '@/lib/useSpeech';
 
 interface Props {
   answers: Answers;
@@ -66,6 +67,19 @@ export default function CareerFacts({ answers, onSave }: Props) {
   });
   const [saved, setSaved] = useState(false);
   const [openTip, setOpenTip] = useState(false);
+  // 음성 입력 — 지원 브라우저(Chrome 계열)에서만 버튼이 나타난다. 삼성 인터넷은 미지원.
+  const speech = useSpeech('ko-KR');
+  const [hearing, setHearing] = useState<string | null>(null); // 지금 듣고 있는 칸
+
+  function dictate(key: string) {
+    if (speech.listening) { speech.stop(); setHearing(null); return; }
+    setHearing(key);
+    speech.start((text) => {
+      // 결과는 칸에 넣기만 한다 — 자동 제출하지 않는다. 틀리면 사용자가 고친다.
+      setV((s) => ({ ...s, [key]: text }));
+      setHearing(null);
+    });
+  }
 
   const ready = Boolean(v.factOrg.trim() && v.factPeriod.trim());
 
@@ -130,17 +144,31 @@ export default function CareerFacts({ answers, onSave }: Props) {
               {!f.required && <em className="facts-optional">선택</em>}
             </span>
             <span className="facts-hint">{f.hint}</span>
-            <input
-              className="facts-input"
-              type="text"
-              inputMode="text"
-              autoComplete="off"
-              placeholder={f.placeholder}
-              value={v[f.key]}
-              onChange={(e) => setV((s) => ({ ...s, [f.key]: e.target.value }))}
-            />
+            <span className="facts-row">
+              <input
+                className="facts-input"
+                type="text"
+                inputMode="text"
+                autoComplete="off"
+                placeholder={f.placeholder}
+                value={v[f.key]}
+                onChange={(e) => setV((s) => ({ ...s, [f.key]: e.target.value }))}
+              />
+              {speech.supported && (
+                <button
+                  type="button"
+                  className={`facts-mic${hearing === f.key ? ' on' : ''}`}
+                  aria-label={hearing === f.key ? '듣는 중 — 누르면 멈춥니다' : '말로 입력하기'}
+                  onClick={() => dictate(f.key)}
+                >
+                  {hearing === f.key ? '듣는 중…' : '🎤 말로'}
+                </button>
+              )}
+            </span>
           </label>
         ))}
+
+      {!saved && speech.error && <p className="facts-mic-err" role="alert">{speech.error}</p>}
 
       {!saved && (
         <div className="facts-actions">
