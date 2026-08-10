@@ -17,6 +17,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ResumeDoc from './ResumeDoc';
 import JobMatches from './JobMatches';
+import NextSteps from './NextSteps';
 import MemoirCard from './MemoirCard';
 import {
   FLOW, ENRICH_STEPS, REWARD_BY_KEY, ACK_BY_KEY, EDU_CHIPS,
@@ -519,6 +520,9 @@ export default function EntryFunnel() {
               </a>
             )}
             <JobMatches matches={matches} selectedId={selectedJob} onSelect={setSelectedJob} sourceLabel={jobResult?.label ?? '공고 불러오는 중…'} />
+
+            {/* 이력서 다음의 "이제 뭘 하죠?" — 무료 상담처·훈련비·자격증 판별 */}
+            <NextSteps field={answers.field} />
 
             {/* 유기적 연결: 선물로 온 분은 보낸 자녀에게 회신, 아니면 동년배 전파 */}
             <ShareRow giftFrom={gift.current?.from ?? null} onShare={(kind) => record('share-' + kind, '복사')} />

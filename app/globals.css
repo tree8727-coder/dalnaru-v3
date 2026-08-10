@@ -832,6 +832,121 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   margin-top: 4px;
 }
 
+/* ===== 다음 걸음 (이력서 이후 — 무료 상담처·훈련비·자격증 판별) =====
+   scripts/a11y.py 기준을 처음부터 지킨다: 본문 16px 이상, 터치 44px 이상. */
+.nextsteps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+.nextsteps-title {
+  font-size: 1.15rem;         /* 18.4px */
+  line-height: 1.45;
+  margin: 0;
+  color: var(--text-primary, #F4E7C3);
+  text-wrap: balance;
+}
+.nextstep-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px 16px 18px;
+}
+.nextstep-num {
+  flex: 0 0 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg-color);
+  font-weight: 800;
+  font-size: 1rem;            /* 16px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+.nextstep-body { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.nextstep-body h4 {
+  margin: 0;
+  font-size: 1.05rem;         /* 16.8px */
+  line-height: 1.5;
+  color: var(--text-primary, #F4E7C3);
+}
+.nextstep-body p {
+  margin: 0;
+  font-size: 1rem;            /* 16px — 기준 하한 */
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+.nextstep-why {
+  font-size: 0.95rem !important;  /* 15.2px — 보조 설명. 확대 모드에서 함께 커진다 */
+  color: var(--text-muted) !important;
+}
+.nextstep-note {
+  background: rgba(115, 146, 228, 0.14);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+.nextstep-src {
+  font-size: 0.9rem !important;
+  color: var(--text-muted) !important;
+  line-height: 1.5;
+}
+.nextstep-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.nextstep-btn {
+  min-height: 48px;           /* 44px 기준 + 여유 */
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 18px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--bg-color);
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.nextstep-btn-sub {
+  background: transparent;
+  color: var(--text-primary, #F4E7C3);
+  border: 1.5px solid var(--accent);
+}
+.nextstep-btn:active { transform: scale(0.98); }
+.cert-list { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.cert-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.18);
+  font-size: 1rem;
+}
+.cert-name { color: var(--text-primary, #F4E7C3); }
+.cert-rate { font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.nextstep-tail {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  text-align: center;
+  margin: 4px 0 0;
+}
+/* 글자 크게 모드에서 함께 커진다 */
+.funnel-shell.font-large .nextsteps-title { font-size: 1.4rem; }
+.funnel-shell.font-large .nextstep-body h4 { font-size: 1.25rem; }
+.funnel-shell.font-large .nextstep-body p,
+.funnel-shell.font-large .cert-list li,
+.funnel-shell.font-large .nextstep-btn { font-size: 1.15rem; }
+.funnel-shell.font-large .nextstep-why { font-size: 1.05rem !important; }
+.funnel-shell.font-large .nextstep-src { font-size: 1rem !important; }
+
 /* ===== 회고 카드 (가족 선물용 — 감성 네이비+골드) ===== */
 .memoir-card {
   /* 수채 텍스처(힉스필드 생성, 비브랜드 장식 — brand-visual-log 기록) 위에
