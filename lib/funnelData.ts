@@ -140,6 +140,29 @@ export const CERT_CHIPS: Chip[] = [
 
 export const ORG_CHIPS = ['혼자 또는 소규모', '10명 안팎 조직', '수십 명 규모 조직', '100명 이상 조직'];
 export const YEAR_CHIPS = ['10년 이하', '10년~20년', '20년~30년', '30년 이상 평생'];
+
+/**
+ * 연차 칩을 문장에 넣을 때 쓰는 표현.
+ *
+ * 라벨을 그대로 박으면 "10년 이하 동안 현장을 지켜온", "30년 이상 평생 동안" 처럼
+ * 말이 안 되는 문장이 나온다 (2026-08-11 프로덕션 완주 테스트에서 확인).
+ * 네 칩 중 둘이 그랬고, 그중 하나는 이 나이대에서 가장 많이 고를 항목이다.
+ *
+ * 값을 고른 기준 두 가지:
+ * 1. "~ 동안" 뒤에 붙어도 말이 되어야 한다 ("10년 넘게 동안"은 비문이라 못 쓴다)
+ * 2. **절대 부풀리지 않는다.** 3년 일한 사람이 '10년 이하'를 골랐는데 "10년 남짓"이
+ *    되면 기업에 내는 문서에서 경력을 과장하는 셈이다. 그래서 '여러 해'로 둔다.
+ *    '30여 년'은 40년 경력을 조금 줄여 말하지만, 넘겨 말하는 것보다 안전하다.
+ *
+ * 일자리 매칭(jobMatch)은 계속 원래 라벨로 비교한다 — 여기서 바꾸지 않는다.
+ */
+const YEARS_PHRASE: Record<string, string> = {
+  '10년 이하': '여러 해',
+  '10년~20년': '10여 년',
+  '20년~30년': '20여 년',
+  '30년 이상 평생': '30여 년',
+};
+const yearsPhrase = (y?: string): string => (y ? YEARS_PHRASE[y] ?? y : '');
 export const ROLE_CHIPS = ['실무 전문가', '팀장·부장', '현장소장·공장장', '임원', '사장·대표'];
 export const WORKTYPE_CHIPS = ['풀타임 정규직', '파트타임', '자문·프로젝트 단위', '형태는 상관없음'];
 export const GOAL_CHIPS = ['재취업 준비', '파트타임·자문', '창업 준비', '후배 멘토링'];
@@ -382,7 +405,7 @@ export function buildResume(a: Answers): Resume {
   return {
     name: a.name || '',
     title: achvOpt ? `[${achvOpt.title}]` : '',
-    headline: [a.years, a.field, a.role].filter(Boolean).join(' '),
+    headline: [yearsPhrase(a.years), a.field, a.role].filter(Boolean).join(' '),
     goal: a.goal ?? '',
     workType: a.workType ?? '',
     edu: a.eduLevel ?? '',
@@ -392,7 +415,7 @@ export function buildResume(a: Answers): Resume {
     ].slice(0, 4),
     career: a.field
       ? {
-          period: a.years ?? '',
+          period: yearsPhrase(a.years),
           org: [a.field, a.orgSize].filter(Boolean).join(' · '),
           role: a.role ?? '',
           duties,
@@ -400,10 +423,10 @@ export function buildResume(a: Answers): Resume {
         }
       : null,
     experiences,
-    certs: a.cert === '경력이 곧 자격입니다' ? `별도 자격 대신 ${a.years ?? ''} 실무 경력으로 증명` : (a.cert ?? ''),
+    certs: a.cert === '경력이 곧 자격입니다' ? `별도 자격 대신 ${yearsPhrase(a.years)} 실무 경력으로 증명` : (a.cert ?? ''),
     tacitQuote: a.tacit ?? '',
     summary: a.field
-      ? `${a.years ?? ''} 동안 ${a.field} 현장을 지켜온 ${a.role ?? '전문가'}입니다. ` +
+      ? `${yearsPhrase(a.years)} 동안 ${a.field} 현장을 지켜온 ${a.role ?? '전문가'}입니다. ` +
         (a.achvNum ? `${a.achvNum}의 기록이 제 일하는 방식을 증명합니다. ` : '') +
         (a.goal ? `이제 그 경험으로 ${GOAL_PHRASE[a.goal] ?? '새로운 시작'}을 준비하고 있습니다.` : '')
       : '',
@@ -426,7 +449,7 @@ export interface Memoir {
 
 export function buildMemoir(a: Answers): Memoir {
   return {
-    title: `${a.years ?? ''}, 하나의 길`,
+    title: `${yearsPhrase(a.years)}, 하나의 길`,
     headline: [a.field, a.role].filter(Boolean).join('의 ') + (a.name ? ` — ${a.name}` : ''),
     crisis: a.hardMoment && a.overcome
       ? `${HARD_PHRASE[a.hardMoment] ?? a.hardMoment} 앞에서도 ${OVERCOME_PHRASE[a.overcome] ?? ''} 버텨냈습니다.`
