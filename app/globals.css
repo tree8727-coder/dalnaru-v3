@@ -832,6 +832,134 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   margin-top: 4px;
 }
 
+/* ===== 제출용 사실 입력 (회사명·기간·직책·자격증) =====
+   칩만으로 만든 이력서는 제출이 안 된다. 넷만 직접 받는다.
+   본문 16px / 터치 48px 기준을 지킨다 (scripts/a11y.py). */
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 18px 16px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+}
+.facts-title {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.45;
+  color: var(--text-primary, #F4E7C3);
+  text-wrap: balance;
+}
+.facts-lead, .facts-done {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+.facts-done { color: var(--text-primary, #F4E7C3); }
+.facts-field { display: flex; flex-direction: column; gap: 4px; }
+.facts-label {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary, #F4E7C3);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.facts-optional {
+  font-style: normal;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--bg-color);
+  background: var(--text-muted);
+  border-radius: 4px;
+  padding: 1px 7px;
+}
+.facts-hint { font-size: 1rem; color: var(--text-muted); line-height: 1.5; }
+.facts-input {
+  min-height: 52px;              /* 44px 기준 + 여유. 손끝 떨림 감안 */
+  margin-top: 2px;
+  padding: 12px 14px;
+  font-size: 1.05rem;            /* 16.8px — 모바일 자동 확대(16px 미만) 방지 */
+  font-family: inherit;
+  color: var(--text-primary, #F4E7C3);
+  background: rgba(0, 0, 0, 0.25);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  border-radius: 10px;
+}
+.facts-input::placeholder { color: var(--text-muted); opacity: 0.75; }
+.facts-input:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+.facts-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.facts-btn {
+  min-height: 52px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  border: 0;
+  background: var(--accent);
+  color: var(--bg-color);
+  font-size: 1.05rem;
+  font-weight: 800;
+  font-family: inherit;
+}
+.facts-btn:disabled { background: var(--text-muted); opacity: 0.55; }
+.facts-skip {
+  min-height: 48px;
+  background: none;
+  border: 0;
+  color: var(--text-muted);
+  font-size: 1rem;
+  font-family: inherit;
+  text-decoration: underline;
+}
+.facts-tip {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 4px 4px 4px 0;
+}
+.facts-tip-toggle {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  background: none;
+  border: 0;
+  text-align: left;
+  color: var(--accent);
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: inherit;
+}
+.facts-tip-body { padding: 0 14px 12px; display: flex; flex-direction: column; gap: 8px; }
+.facts-tip-body p { margin: 0; font-size: 1rem; line-height: 1.6; color: var(--text-secondary); }
+.facts-tip-how { color: var(--text-muted) !important; }
+.facts-tip-link {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1.5px solid var(--accent);
+  color: var(--text-primary, #F4E7C3);
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.funnel-shell.font-large .facts-title { font-size: 1.4rem; }
+.funnel-shell.font-large .facts-lead,
+.funnel-shell.font-large .facts-hint,
+.funnel-shell.font-large .facts-done,
+.funnel-shell.font-large .facts-tip-body p { font-size: 1.15rem; }
+.funnel-shell.font-large .facts-label,
+.funnel-shell.font-large .facts-input,
+.funnel-shell.font-large .facts-btn { font-size: 1.2rem; }
+@media print { .facts { display: none; } }
+
 /* ===== 다음 걸음 (이력서 이후 — 무료 상담처·훈련비·자격증 판별) =====
    scripts/a11y.py 기준을 처음부터 지킨다: 본문 16px 이상, 터치 44px 이상. */
 .nextsteps {

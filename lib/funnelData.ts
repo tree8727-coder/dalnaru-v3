@@ -21,7 +21,23 @@ export type Answers = Partial<{
   needs: string;       // 자유 서술 — 지금 제일 답답한 것 (Unmet Needs, B2B 핵심)
   goal: string; name: string;
   eduLevel: string;    // 공고 지원 양식 완성 시에만 묻는다 (본 퍼널에서는 안 물음 — 짧게)
+
+  /* ---------- 제출용 사실 (facts) ----------
+   * 칩 선택만으로 만든 이력서는 같은 분야면 모두 같은 문서가 되어 제출이 불가능하다.
+   * 인사담당자가 가장 먼저 확인하는 건 "어디서 언제까지"이고 그건 고를 수 없는 사실이다.
+   * 그래서 이 넷만 직접 받는다 — 대화가 끝난 뒤, 선택 사항으로.
+   * 국민연금 가입증명서(무료·본인 발급)에 사업장명과 기간이 그대로 나온다. */
+  factOrg: string;      // 회사명 (예: 대한건설(주))
+  factPeriod: string;   // 재직 기간 (예: 2011.03 ~ 2024.08)
+  factTitle: string;    // 직책 (예: 현장소장)
+  factCert: string;     // 실제 자격증명·취득연도
+  factContact: string;  // 연락처 (제출용. 저장하지 않고 인쇄본에만 쓴다)
 }>;
+
+/** 제출 가능한 이력서가 되려면 최소한 이 둘은 있어야 한다. */
+export function isSubmittable(a: Answers): boolean {
+  return Boolean(a.factOrg?.trim() && a.factPeriod?.trim());
+}
 
 /* 공고 지원 양식(입사지원서)에 필요한 추가 항목.
  * 기업별 전용 양식 다운로드는 불가(로그인·저작물 — job-posting-sources 조사).
@@ -415,15 +431,20 @@ export function buildResume(a: Answers): Resume {
     ].slice(0, 4),
     career: a.field
       ? {
-          period: yearsPhrase(a.years),
-          org: [a.field, a.orgSize].filter(Boolean).join(' · '),
-          role: a.role ?? '',
+          // 실제로 입력한 사실이 있으면 그것이 우선. 없으면 분류로 대체하되
+          // 그 상태는 제출용이 아니며 화면에서 그렇게 안내한다(isSubmittable).
+          period: a.factPeriod?.trim() || yearsPhrase(a.years),
+          org: a.factOrg?.trim() || [a.field, a.orgSize].filter(Boolean).join(' · '),
+          role: a.factTitle?.trim() || a.role || '',
           duties,
           achievement: [a.achv, a.achvNum].filter(Boolean).join(' — '),
         }
       : null,
     experiences,
-    certs: a.cert === '경력이 곧 자격입니다' ? `별도 자격 대신 ${yearsPhrase(a.years)} 실무 경력으로 증명` : (a.cert ?? ''),
+    certs: a.factCert?.trim()
+      || (a.cert === '경력이 곧 자격입니다'
+            ? `별도 자격 대신 ${yearsPhrase(a.years)} 실무 경력으로 증명`
+            : (a.cert ?? '')),
     tacitQuote: a.tacit ?? '',
     summary: a.field
       ? `${yearsPhrase(a.years)} 동안 ${a.field} 현장을 지켜온 ${a.role ?? '전문가'}입니다. ` +

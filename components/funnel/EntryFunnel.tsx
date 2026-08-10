@@ -18,6 +18,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import ResumeDoc from './ResumeDoc';
 import JobMatches from './JobMatches';
 import NextSteps from './NextSteps';
+import CareerFacts from './CareerFacts';
 import MemoirCard from './MemoirCard';
 import {
   FLOW, ENRICH_STEPS, REWARD_BY_KEY, ACK_BY_KEY, EDU_CHIPS,
@@ -457,6 +458,17 @@ export default function EntryFunnel() {
               </div>
             )}
             <ResumeDoc resume={resume} targetJob={targetJob} />
+
+            {/* 제출용 사실 — 회사명·기간이 없으면 이 문서는 못 낸다.
+                이력서를 이미 보여 준 뒤에 묻는다(보상 먼저). */}
+            <CareerFacts
+              answers={answers}
+              onSave={(facts) => {
+                setAnswers((prev) => ({ ...prev, ...facts }));
+                record('facts', Object.keys(facts).filter((k) => (facts as Record<string, string>)[k]?.trim()).join(','));
+              }}
+            />
+
             <div className="funnel-actions">
               <button className="btn-primary" onClick={() => window.print()}>
                 📄 {targetJob ? '이 공고 맞춤 이력서' : '이력서'} PDF로 저장하기
