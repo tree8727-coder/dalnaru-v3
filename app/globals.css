@@ -885,7 +885,9 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   color: var(--text-secondary);
 }
 .nextstep-why {
-  font-size: 0.95rem !important;  /* 15.2px — 보조 설명. 확대 모드에서 함께 커진다 */
+  /* 보조 설명이라도 16px 아래로 내리지 않는다 — scripts/a11y.py가 잡아낸다.
+     위계는 크기가 아니라 색으로 준다. */
+  font-size: 1rem !important;
   color: var(--text-muted) !important;
 }
 .nextstep-note {
@@ -895,9 +897,9 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   padding: 10px 12px;
 }
 .nextstep-src {
-  font-size: 0.9rem !important;
+  font-size: 1rem !important;
   color: var(--text-muted) !important;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 .nextstep-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
 .nextstep-btn {
@@ -944,8 +946,8 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
 .funnel-shell.font-large .nextstep-body p,
 .funnel-shell.font-large .cert-list li,
 .funnel-shell.font-large .nextstep-btn { font-size: 1.15rem; }
-.funnel-shell.font-large .nextstep-why { font-size: 1.05rem !important; }
-.funnel-shell.font-large .nextstep-src { font-size: 1rem !important; }
+.funnel-shell.font-large .nextstep-why,
+.funnel-shell.font-large .nextstep-src { font-size: 1.15rem !important; }
 
 /* ===== 회고 카드 (가족 선물용 — 감성 네이비+골드) ===== */
 .memoir-card {
