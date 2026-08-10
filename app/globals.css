@@ -586,6 +586,10 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
 
 /* ===== 계산기 ===== */
 .calc-shell { height: auto; min-height: 100dvh; }
+/* 칩 상자의 max-height(32dvh)는 랜딩용이다 — 위에 대화가 있어 칩이 화면을 먹으면 안 되니까.
+   가이드·계산기는 페이지 자체가 스크롤돼서 그 뚜껑이 아래를 텅 빈 채로 두고 선택지만 자른다
+   (2026-08-10: 칩 7개가 되자 마지막 칩이 반쯤 잘림). 여기서는 뚜껑을 연다. */
+.calc-shell .funnel-chips { max-height: none; overflow-y: visible; }
 .calc-scroll { flex: 1; display: flex; flex-direction: column; gap: 14px; padding-bottom: 24px; }
 .calc-title { font-size: 1.5rem; font-weight: 800; line-height: 1.35; color: var(--text-primary); }
 .calc-sub { font-size: 1rem; color: var(--text-secondary); margin-top: -6px; }
