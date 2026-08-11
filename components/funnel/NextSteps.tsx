@@ -109,6 +109,11 @@ export default function NextSteps({ field }: Props) {
           {field} 분야에서 오래 일하신 경험은 그대로 남아 있습니다. 순서만 아시면 됩니다.
         </p>
       )}
+
+      {/* 아담 실험 진입로 — 전문가 판단 수집. 눌리는 비율 자체가 실험 데이터다 */}
+      <a className="nextstep-btn nextstep-btn-sub" href="/wisdom" style={{ alignSelf: 'center' }}>
+        📖 30년 요령 남기기 — 후배들을 위해
+      </a>
     </section>
   );
 }

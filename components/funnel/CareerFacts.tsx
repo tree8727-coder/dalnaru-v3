@@ -64,6 +64,7 @@ export default function CareerFacts({ answers, onSave }: Props) {
     factPeriod: answers.factPeriod ?? '',
     factTitle: answers.factTitle ?? '',
     factCert: answers.factCert ?? '',
+    factVerified: answers.factVerified ?? '',
   });
   const [saved, setSaved] = useState(false);
   const [openTip, setOpenTip] = useState(false);
@@ -169,6 +170,21 @@ export default function CareerFacts({ answers, onSave }: Props) {
         ))}
 
       {!saved && speech.error && <p className="facts-mic-err" role="alert">{speech.error}</p>}
+
+      {!saved && (
+        <label className="facts-verify">
+          <input
+            type="checkbox"
+            checked={v.factVerified === 'y'}
+            onChange={(e) => setV((s) => ({ ...s, factVerified: e.target.checked ? 'y' : '' }))}
+          />
+          <span>
+            국민연금 가입증명서를 보고 <b>대조해서 적었습니다</b>
+            <small>체크하시면 이력서에 &ldquo;국민연금 가입증명서 대조&rdquo; 표시가 붙습니다.
+            기업이 이 표시를 보면 경력을 더 믿을 수 있습니다.</small>
+          </span>
+        </label>
+      )}
 
       {!saved && (
         <div className="facts-actions">

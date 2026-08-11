@@ -83,7 +83,9 @@ export default function ResumeDoc({
       </section>
 
       <section>
-        <h4 className="resume-h">4. 경력 사항</h4>
+        <h4 className="resume-h">4. 경력 사항
+          {resume.career?.verified && <span className="resume-verified">국민연금 가입증명서 대조</span>}
+        </h4>
         {resume.career ? (
           <table className="resume-table">
             <tbody>

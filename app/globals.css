@@ -1010,6 +1010,113 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
 .funnel-shell.font-large .facts-btn { font-size: 1.2rem; }
 @media print { .facts { display: none; } }
 
+/* ===== 대조 확인 체크 + 이력서 배지 (이브: 검증 표시의 씨앗) ===== */
+.facts-verify {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.facts-verify input { width: 24px; height: 24px; margin-top: 3px; accent-color: var(--accent); flex: 0 0 auto; }
+.facts-verify span { font-size: 1rem; line-height: 1.6; color: var(--text-secondary); }
+.facts-verify b { color: var(--text-primary); }
+.facts-verify small { display: block; font-size: 1rem; color: var(--text-muted); margin-top: 2px; }
+.resume-verified {
+  float: right;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1F6F5C;
+  border: 1.5px solid #1F6F5C;
+  border-radius: 6px;
+  padding: 2px 10px;
+  letter-spacing: 0;
+}
+
+/* ===== 지혜 남기기 (아담 실험 — 전문가 판단 수집) ===== */
+.wisdom-shell {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.wisdom-title { font-size: 1.5rem; line-height: 1.4; margin: 0; color: var(--text-primary); }
+.wisdom-lead { font-size: 1.05rem; line-height: 1.7; color: var(--text-secondary); margin: 0; }
+.wisdom-block { display: flex; flex-direction: column; gap: 8px; }
+.wisdom-q { font-size: 1.1rem; line-height: 1.55; margin: 0; color: var(--text-primary); }
+.wisdom-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.wisdom-chip {
+  min-height: 48px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  border: 1.5px solid var(--border-highlight);
+  border-radius: 10px;
+}
+.wisdom-chip.on { background: var(--primary); color: var(--bg-color); border-color: var(--primary); }
+.wisdom-input {
+  width: 100%;
+  padding: 14px;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.25);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  border-radius: 10px;
+  resize: vertical;
+}
+.wisdom-input:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
+.wisdom-mic {
+  align-self: flex-start;
+  min-height: 48px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  background: transparent;
+}
+.wisdom-mic.on { background: var(--accent); color: var(--bg-color); }
+.wisdom-err { margin: 0; font-size: 1rem; color: #F0B9B9; }
+.wisdom-consent {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-highlight);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.wisdom-consent input { width: 24px; height: 24px; margin-top: 3px; accent-color: var(--accent); flex: 0 0 auto; }
+.wisdom-consent span { font-size: 1rem; line-height: 1.6; color: var(--text-secondary); }
+.wisdom-consent b { color: var(--text-primary); }
+.wisdom-consent small { display: block; font-size: 1rem; color: var(--text-muted); margin-top: 2px; }
+.wisdom-btn {
+  min-height: 52px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  border: 0;
+  background: var(--primary);
+  color: var(--bg-color);
+  font-size: 1.05rem;
+  font-weight: 800;
+  font-family: inherit;
+  text-align: center;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.wisdom-btn:disabled { background: var(--text-muted); opacity: 0.55; }
+
 /* ===== 다음 걸음 (이력서 이후 — 무료 상담처·훈련비·자격증 판별) =====
    scripts/a11y.py 기준을 처음부터 지킨다: 본문 16px 이상, 터치 44px 이상. */
 .nextsteps {

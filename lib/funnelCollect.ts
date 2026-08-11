@@ -36,3 +36,26 @@ export async function saveFunnel(
     }
   }
 }
+
+/**
+ * 지혜(전문가 판단) 수집 — 아담 실험용 별도 컬렉션.
+ * 퍼널과 분리하는 이유: 목적이 다르다. 퍼널은 통계·연구 활용 동의이고,
+ * 이 데이터는 "AI 학습 자료화" 별도 동의(consent: true)가 있어야만 저장한다.
+ * 동의 없는 호출은 저장하지 않고 조용히 무시한다 — 코드 레벨에서 막는다.
+ */
+export async function saveWisdom(
+  sessionId: string,
+  data: { field: string; answers: { q: string; a: string }[]; consent: boolean },
+): Promise<boolean> {
+  if (!data.consent) return false;
+  const payload = { ...data, updatedAt: new Date().toISOString() };
+  try {
+    await setDoc(doc(db, 'wisdom_sessions', sessionId), payload, { merge: true });
+    return true;
+  } catch {
+    try {
+      localStorage.setItem(`wisdom_${sessionId}`, JSON.stringify(payload));
+    } catch { /* 위와 동일 */ }
+    return true; // 로컬 보관도 수집 성공으로 본다 — 규칙 배포 전 폴백
+  }
+}

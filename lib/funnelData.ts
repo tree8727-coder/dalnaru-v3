@@ -32,6 +32,7 @@ export type Answers = Partial<{
   factTitle: string;    // 직책 (예: 현장소장)
   factCert: string;     // 실제 자격증명·취득연도
   factContact: string;  // 연락처 (제출용. 저장하지 않고 인쇄본에만 쓴다)
+  factVerified: string; // 'y'면 국민연금 가입증명서와 대조해 적었다는 뜻 (이브: 검증 표시의 씨앗)
 }>;
 
 /** 제출 가능한 이력서가 되려면 최소한 이 둘은 있어야 한다. */
@@ -391,6 +392,7 @@ export interface Resume {
   career: {
     period: string; org: string; role: string;
     duties: string[]; achievement: string;
+    verified: boolean; // 국민연금 가입증명서와 대조했다고 사용자가 확인함
   } | null;
   experiences: string[];  // 주요 경험 (위기 대응·성취)
   certs: string;
@@ -438,6 +440,7 @@ export function buildResume(a: Answers): Resume {
           role: a.factTitle?.trim() || a.role || '',
           duties,
           achievement: [a.achv, a.achvNum].filter(Boolean).join(' — '),
+          verified: a.factVerified === 'y' && Boolean(a.factOrg?.trim()),
         }
       : null,
     experiences,
