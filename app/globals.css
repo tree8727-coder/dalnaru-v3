@@ -1035,6 +1035,109 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   letter-spacing: 0;
 }
 
+/* 계산 결과 공유 — 단톡 전파 장치 */
+.calc-share {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 14px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1.5px solid var(--accent);
+  background: rgba(115, 146, 228, 0.12);
+  color: var(--text-primary);
+  font-size: 1.05rem;
+  font-weight: 800;
+  font-family: inherit;
+}
+
+/* ===== 자격증 사실 확인 (/cert — 검색 유입구) ===== */
+.cert-shell {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.cert-eyebrow { margin: 0; font-size: 1rem; font-weight: 700; letter-spacing: 0.12em; color: var(--accent); }
+.cert-title { margin: 0; font-size: 1.65rem; line-height: 1.4; color: var(--text-primary); }
+.cert-lead { margin: 0; font-size: 1.08rem; line-height: 1.75; color: var(--text-secondary); }
+.cert-verdict {
+  border-radius: 14px;
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cert-verdict.ok { background: rgba(50, 215, 75, 0.09); border: 1.5px solid rgba(50, 215, 75, 0.4); }
+.cert-verdict.warn { background: rgba(255, 159, 10, 0.09); border: 1.5px solid rgba(255, 159, 10, 0.4); }
+.cert-big { margin: 0; font-size: 3rem; line-height: 1.1; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.cert-big-sub { margin: 0; font-size: 1.1rem; line-height: 1.7; color: var(--text-secondary); }
+.cert-src { margin: 0; font-size: 1rem; color: var(--text-muted); line-height: 1.55; }
+.cert-note { margin: 0; font-size: 1.02rem; line-height: 1.7; color: var(--text-secondary); }
+.cert-check { margin: 4px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; }
+.cert-check li { font-size: 1.02rem; line-height: 1.7; color: var(--text-secondary); }
+.cert-block { display: flex; flex-direction: column; gap: 8px; }
+.cert-block h2 { margin: 0; font-size: 1.15rem; color: var(--text-primary); line-height: 1.5; }
+.cert-rank { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.cert-rank li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 4px 14px 4px 4px;
+}
+.cert-rank a {
+  flex: 1;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 12px;
+  font-size: 1.02rem;
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.cert-rank a.me { color: var(--primary); font-weight: 800; text-decoration: none; }
+.cert-rank b { color: var(--primary); font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 1.02rem; }
+.cert-rank b.na { color: var(--text-muted); font-weight: 400; }
+.cert-cta {
+  margin-top: 6px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--primary);
+  border-radius: 14px;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.cert-cta p { margin: 0; font-size: 1.05rem; line-height: 1.7; color: var(--text-secondary); }
+.cert-btn {
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 18px;
+  border-radius: 10px;
+  background: var(--primary);
+  color: var(--bg-color);
+  font-size: 1.05rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+.cert-more {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-size: 1rem;
+  text-decoration: underline;
+}
+
 /* ===== 공고 맞춤 한 줄 (TargetLine) ===== */
 .targetline {
   display: flex;

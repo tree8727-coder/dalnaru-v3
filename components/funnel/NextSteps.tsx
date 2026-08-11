@@ -101,6 +101,9 @@ export default function NextSteps({ field }: Props) {
           <p className="nextstep-src">
             {CERT_SOURCE.by} · {CERT_SOURCE.what} · {CERT_SOURCE.when}
           </p>
+          <a className="nextstep-btn nextstep-btn-sub" href="/cert">
+            자격증별 자세히 보기
+          </a>
         </div>
       </article>
 

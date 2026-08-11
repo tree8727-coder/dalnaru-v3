@@ -116,6 +116,21 @@ export default function CalcPage() {
             ))}
           </div>
 
+          {/* 단톡 전파 — 5060의 유일한 유기적 채널은 가족·동창 단톡방이다.
+              결과 숫자는 자기 얘기라서 공유가 자연스럽다. 링크가 곧 트래픽. */}
+          <button
+            type="button"
+            className="calc-share"
+            onClick={() => {
+              const msg = `내 은퇴자금, ${r.depletionAge ? r.depletionAge + '세에 바닥난다네' : '계산해 봤는데'}… 너도 한번 해봐. 무료야.
+dalnaru.vercel.app/calc`;
+              if (navigator.share) { void navigator.share({ text: msg }); }
+              else { void navigator.clipboard?.writeText(msg).then(() => alert('복사됐습니다. 단톡방에 붙여넣으세요.')); }
+            }}
+          >
+            📤 이 계산, 친구에게 보내기
+          </button>
+
           <div className="calc-cta">
             <Link href="/funnel" className="btn-primary calc-cta-btn">
               부족분, 일로 채워볼까요? — 3분 이력서 만들기
