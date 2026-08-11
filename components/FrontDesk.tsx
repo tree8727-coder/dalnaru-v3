@@ -107,6 +107,14 @@ export default function FrontDesk() {
         </button>
       </div>
 
+      {/* 신뢰 배지 — 5060은 모르는 사이트를 보이스피싱부터 의심한다.
+          돈·개인정보·소속, 세 가지 걱정에 첫 화면에서 먼저 답한다. */}
+      <div className="trust-badges" aria-label="안심하셔도 되는 이유">
+        <span>💰 전부 무료</span>
+        <span>🔒 이름·번호 안 받음</span>
+        <span>🏫 서강대 연구실에서 시작</span>
+      </div>
+
       <div className="funnel-chat">
         {messages.map((m, i) => (
           <div key={i} className={`funnel-bubble ${m.role}`}>
@@ -138,6 +146,8 @@ export default function FrontDesk() {
         응답은 이름 없이, 통계·연구 목적으로 보관됩니다 · 무료입니다
         <br />
         <a href="/gift" className="gift-link">👧 자녀분이신가요? — 부모님께 이력서 선물하기</a>
+        <br />
+        <a href="/partners" className="partners-link">기관·기업이신가요? — 도입 안내</a>
       </p>
     </div>
   );

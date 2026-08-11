@@ -134,14 +134,19 @@ export default function EntryFunnel() {
     void saveFunnel(session.current.id, { steps: session.current.steps, done });
   };
 
-  const botSay = useCallback((text: string, onDone?: () => void) => {
-    setMessages((m) => [...m, { role: 'bot', text: '', typing: true }]);
+  const botSay = useCallback((text: string, onDone?: () => void, instant = false) => {
+    // 자기 말풍선의 인덱스를 기억하고 그 칸만 갱신한다.
+    // (예전엔 "마지막 칸"을 갱신해서, 타이핑 중 사용자가 답하면 사용자 말풍선을 덮어썼다.
+    //  이제 타이핑 중에도 버튼을 누를 수 있어야 하므로 — 첫 10초 개선 — 이 수정이 전제다.)
+    let idx = -1;
+    setMessages((m) => { idx = m.length; return [...m, { role: 'bot', text: instant ? text : '', typing: !instant }]; });
+    if (instant) { later(() => onDone?.(), 80); return; }
     let i = 0;
     const tick = () => {
       i += 2;
       setMessages((m) => {
         const copy = [...m];
-        copy[copy.length - 1] = { ...copy[copy.length - 1], text: text.slice(0, i), typing: i < text.length };
+        copy[idx] = { ...copy[idx], text: text.slice(0, i), typing: i < text.length };
         return copy;
       });
       if (i < text.length) later(tick, 16);
@@ -172,15 +177,16 @@ export default function EntryFunnel() {
     if (gift.current?.from) {
       const gf = gift.current;
       record('gift-opened', `${gf.to ?? ''}/${gf.field ?? '분야미상'}`);
-      later(() => botSay(
+      botSay(
         `${gf.to ?? '어르신'}, 안녕하세요! ${gf.from}님이 ${gf.to ?? '어르신'}를 위해 준비한 선물입니다. 평생 일해오신 경력은 그 자체로 자산이에요 — 저희가 그걸 기업이 알아보는 이력서 한 장으로 정리해 드릴게요.`,
-        () => later(() => botSay(GREETING[1], () =>
+        () => botSay(GREETING[1], () =>
           later(() => {
             setShowTeaser(true);
-            later(() => botSay(PROMISE, () => { setStage('gate'); setChipsEnabled(true); }), 1200);
-          }, 300),
-        ), 350),
-      ), 600);
+            later(() => { setStage('gate'); setChipsEnabled(true); botSay(PROMISE); }, 600);
+          }, 250),
+        ),
+        true,
+      );
       return;
     }
     const saved = loadSaved();
@@ -197,17 +203,22 @@ export default function EntryFunnel() {
   }, []);
 
   const runGreeting = () => {
-    later(() => botSay(GREETING[0], () =>
-      later(() => botSay(GREETING[1], () =>
+    // 첫 10초 원칙: 빈 화면 0초.
+    // 첫 인사는 즉시 그리고, 시작 버튼은 안내문이 타이핑되는 "동안" 이미 눌린다.
+    // (실측: 예전 방식은 버튼까지 8초 이상 — 5060에게 그 화면은 "멈춘 화면"이다)
+    botSay(GREETING[0], () =>
+      botSay(GREETING[1], () =>
         later(() => {
           setShowTeaser(true);
-          later(() => botSay(PROMISE, () => {
+          later(() => {
             setStage('gate');
             setChipsEnabled(true);
-          }), 1200);
-        }, 300),
-      ), 350),
-    ), 700);
+            botSay(PROMISE);
+          }, 600);
+        }, 250),
+      ),
+      true, // 첫 문장은 타이핑 없이 즉시
+    );
   };
 
   const askStep = (idx: number, a: Answers, ack?: string) => {
@@ -230,7 +241,7 @@ export default function EntryFunnel() {
     : [];
 
   const handleChip = (label: string) => {
-    if (!chipsEnabled || autoTyping) return;
+    if (!chipsEnabled) return; // 타이핑 중에도 누를 수 있다 — botSay가 인덱스 고정이라 안전
     navigator.vibrate?.(12);
 
     if (resumeOffer) {
@@ -551,7 +562,7 @@ export default function EntryFunnel() {
       {chips.length > 0 && (
         <div className="funnel-chips" role="group" aria-label="답변 선택">
           {chips.map((c) => (
-            <button key={c.label} className="funnel-chip" disabled={!chipsEnabled || autoTyping} onClick={() => handleChip(c.label)}>
+            <button key={c.label} className="funnel-chip" disabled={!chipsEnabled} onClick={() => handleChip(c.label)}>
               {c.emoji && <span aria-hidden>{c.emoji} </span>}
               {c.label}
             </button>

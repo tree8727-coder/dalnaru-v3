@@ -1020,7 +1020,7 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   border-radius: 10px;
   cursor: pointer;
 }
-.facts-verify input { width: 24px; height: 24px; margin-top: 3px; accent-color: var(--accent); flex: 0 0 auto; }
+.facts-verify input { width: 44px; height: 44px; margin-top: 3px; accent-color: var(--accent); flex: 0 0 auto; }
 .facts-verify span { font-size: 1rem; line-height: 1.6; color: var(--text-secondary); }
 .facts-verify b { color: var(--text-primary); }
 .facts-verify small { display: block; font-size: 1rem; color: var(--text-muted); margin-top: 2px; }
@@ -1034,6 +1034,81 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   padding: 2px 10px;
   letter-spacing: 0;
 }
+
+/* ===== 첫 화면 신뢰 배지 ===== */
+.trust-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 4px 6px;
+}
+.trust-badges span {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: rgba(244, 239, 216, 0.08);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 8px 14px;
+}
+.partners-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 4px;
+  font-size: 1rem;
+  color: var(--text-muted);
+  text-decoration: underline;
+}
+
+/* ===== 기관·기업 안내 (/partners — 돈이 들어오는 문) ===== */
+.partners-shell {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.partners-eyebrow { margin: 0; font-size: 1rem; font-weight: 700; letter-spacing: 0.12em; color: var(--accent); }
+.partners-title { margin: 0; font-size: 1.7rem; line-height: 1.4; color: var(--text-primary); }
+.partners-lead { margin: 0; font-size: 1.1rem; line-height: 1.75; color: var(--text-secondary); }
+.partners-try { display: flex; flex-direction: column; gap: 6px; }
+.partners-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: var(--primary);
+  color: var(--bg-color);
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+.partners-mail { background: transparent; color: var(--text-primary); border: 1.5px solid var(--primary); }
+.partners-try-note { margin: 0; font-size: 1rem; color: var(--text-muted); }
+.partners-block { display: flex; flex-direction: column; gap: 10px; }
+.partners-block h2 { margin: 0; font-size: 1.25rem; color: var(--text-primary); }
+.partners-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.partners-card h3 { margin: 0; font-size: 1.05rem; color: var(--primary); }
+.partners-card .pain { margin: 0; font-size: 1rem; color: var(--text-muted); }
+.partners-card .gain { margin: 0; font-size: 1.02rem; line-height: 1.65; color: var(--text-secondary); }
+.partners-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.partners-list li { font-size: 1.02rem; line-height: 1.65; color: var(--text-secondary); }
+.partners-list b { color: var(--text-primary); }
+.partners-pilot { margin: 0; font-size: 1.05rem; line-height: 1.75; color: var(--text-secondary); }
+.partners-foot { margin: 8px 0 0; font-size: 1rem; line-height: 1.9; color: var(--text-muted); }
+.partners-foot a { min-height: 44px; display: inline-flex; align-items: center; color: var(--accent); text-decoration: underline; }
 
 /* ===== 지혜 남기기 (아담 실험 — 전문가 판단 수집) ===== */
 .wisdom-shell {
@@ -1095,7 +1170,7 @@ button { background: none; border: none; cursor: pointer; font-family: inherit; 
   border-radius: 10px;
   cursor: pointer;
 }
-.wisdom-consent input { width: 24px; height: 24px; margin-top: 3px; accent-color: var(--accent); flex: 0 0 auto; }
+.wisdom-consent input { width: 44px; height: 44px; margin-top: 3px; accent-color: var(--accent); flex: 0 0 auto; }
 .wisdom-consent span { font-size: 1rem; line-height: 1.6; color: var(--text-secondary); }
 .wisdom-consent b { color: var(--text-primary); }
 .wisdom-consent small { display: block; font-size: 1rem; color: var(--text-muted); margin-top: 2px; }

@@ -1,0 +1,69 @@
+{
+ "/": {
+  "tap": [],
+  "font": [],
+  "contrast": [],
+  "hscroll": false,
+  "height": 844
+ },
+ "/funnel": {
+  "tap": [],
+  "font": [],
+  "contrast": [],
+  "hscroll": false,
+  "height": 844
+ },
+ "/calc": {
+  "tap": [],
+  "font": [],
+  "contrast": [],
+  "hscroll": false,
+  "height": 1718
+ },
+ "/call": {
+  "tap": [],
+  "font": [],
+  "contrast": [],
+  "hscroll": false,
+  "height": 844
+ },
+ "/guide": {
+  "tap": [],
+  "font": [],
+  "contrast": [],
+  "hscroll": false,
+  "height": 844
+ },
+ "/gift": {
+  "tap": [],
+  "font": [],
+  "contrast": [],
+  "hscroll": false,
+  "height": 844
+ },
+ "/wisdom": {
+  "tap": [
+   {
+    "t": "INPUT",
+    "w": 24,
+    "h": 24
+   }
+  ],
+  "font": [],
+  "contrast": [],
+  "hscroll": false,
+  "height": 1592
+ },
+ "/partners": {
+  "tap": [],
+  "font": [
+   {
+    "t": "This page could not be fou",
+    "px": 14
+   }
+  ],
+  "contrast": [],
+  "hscroll": false,
+  "height": 844
+ }
+}
