@@ -19,6 +19,7 @@ import ResumeDoc from './ResumeDoc';
 import JobMatches from './JobMatches';
 import NextSteps from './NextSteps';
 import CareerFacts from './CareerFacts';
+import TargetLine from './TargetLine';
 import MemoirCard from './MemoirCard';
 import {
   FLOW, ENRICH_STEPS, REWARD_BY_KEY, ACK_BY_KEY, EDU_CHIPS,
@@ -223,7 +224,14 @@ export default function EntryFunnel() {
 
   const askStep = (idx: number, a: Answers, ack?: string) => {
     setStepIdx(idx);
-    const text = ack ? `${ack} ${FLOW[idx].ask(a)}` : FLOW[idx].ask(a);
+    // 이탈 방지 — 긴 대화(질문 수는 데이터 때문에 못 줄인다)의 심리적 이정표.
+    // "얼마나 남았는지 모름"이 중간 이탈의 주범이라, 고비 지점마다 남은 거리를 말해 준다.
+    const cheer =
+      idx === Math.floor(FLOW.length / 2) ? '벌써 절반 오셨습니다. '
+      : idx === FLOW.length - 3 ? '이제 딱 세 개 남았습니다. '
+      : idx === FLOW.length - 1 ? '마지막 질문입니다. '
+      : '';
+    const text = (ack ? `${ack} ` : '') + cheer + FLOW[idx].ask(a);
     later(() => botSay(text, () => {
       committing.current = false;
       setChipsEnabled(true);
@@ -400,6 +408,7 @@ export default function EntryFunnel() {
   const sampleResume = buildResume(SAMPLE_ANSWERS);
   const matches = jobResult?.matches ?? [];
   const targetJob = selectedJob ? matches.find((m) => m.job.id === selectedJob)?.job ?? null : null;
+  const [targetLine, setTargetLine] = useState('');
 
   return (
     <div className={`funnel-shell ${fontLarge ? 'font-large' : ''}`}>
@@ -413,7 +422,9 @@ export default function EntryFunnel() {
       {(stage === 'flow' || stage === 'loading' || stage === 'name') && (
         <button className="resume-gaugebar" onClick={() => setShowPreview((v) => !v)}>
           <span>📄 내 이력서 {progress}% 완성</span>
-          <span className="resume-gaugebar-hint">{reward ?? (showPreview ? '접기 ▲' : '보기 ▼')}</span>
+          <span className="resume-gaugebar-hint">
+            {reward ?? (stage === 'flow' ? `남은 질문 ${Math.max(0, FLOW.length - stepIdx)}개` : showPreview ? '접기 ▲' : '보기 ▼')}
+          </span>
           <div className="funnel-gauge"><div className="funnel-gauge-fill" style={{ width: `${progress}%` }} /></div>
         </button>
       )}
@@ -468,7 +479,7 @@ export default function EntryFunnel() {
                 </div>
               </div>
             )}
-            <ResumeDoc resume={resume} targetJob={targetJob} />
+            <ResumeDoc resume={resume} targetJob={targetJob} targetLine={targetLine} />
 
             {/* 제출용 사실 — 회사명·기간이 없으면 이 문서는 못 낸다.
                 이력서를 이미 보여 준 뒤에 묻는다(보상 먼저). */}
@@ -543,6 +554,16 @@ export default function EntryFunnel() {
               </a>
             )}
             <JobMatches matches={matches} selectedId={selectedJob} onSelect={setSelectedJob} sourceLabel={jobResult?.label ?? '공고 불러오는 중…'} />
+
+            {/* 공고를 고르면 그 공고에 맞춰 딱 한 줄만 더 — 맞춤 지원서의 최소 단위 */}
+            {targetJob && (
+              <TargetLine
+                key={targetJob.id}
+                job={targetJob}
+                value={targetLine}
+                onSave={(line) => { setTargetLine(line); record('targetLine', line.slice(0, 60)); }}
+              />
+            )}
 
             {/* 이력서 다음의 "이제 뭘 하죠?" — 무료 상담처·훈련비·자격증 판별 */}
             <NextSteps field={answers.field} />

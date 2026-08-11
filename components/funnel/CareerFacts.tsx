@@ -21,6 +21,7 @@
 import { useState } from 'react';
 import type { Answers } from '@/lib/funnelData';
 import { useSpeech } from '@/lib/useSpeech';
+import { CERT_NAMES } from '@/lib/certNames';
 
 interface Props {
   answers: Answers;
@@ -153,8 +154,16 @@ export default function CareerFacts({ answers, onSave }: Props) {
                 autoComplete="off"
                 placeholder={f.placeholder}
                 value={v[f.key]}
+                list={f.key === 'factCert' ? 'cert-names' : undefined}
                 onChange={(e) => setV((s) => ({ ...s, [f.key]: e.target.value }))}
               />
+              {f.key === 'factCert' && (
+                // 자격증은 "정확한 종목명"이어야 인사담당자 검색에 걸린다.
+                // 국가자격 종목명(공공데이터)으로 자동완성 — 몇 글자만 치면 고를 수 있다.
+                <datalist id="cert-names">
+                  {CERT_NAMES.map((n) => <option key={n} value={n} />)}
+                </datalist>
+              )}
               {speech.supported && (
                 <button
                   type="button"

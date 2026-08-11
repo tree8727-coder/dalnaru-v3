@@ -12,10 +12,12 @@ const Blank = () => <span className="resume-blank">대화에서 채워집니다<
 export default function ResumeDoc({
   resume,
   targetJob,
+  targetLine,
   preview = false,
 }: {
   resume: Resume;
   targetJob?: JobPosting | null;
+  targetLine?: string;   // 이 공고에 맞춰 한 줄 — 같은 이력서라도 공고마다 첫인상이 달라진다
   preview?: boolean;
 }) {
   const competencies = targetJob
@@ -28,6 +30,7 @@ export default function ResumeDoc({
         <div className="resume-target">
           지원 직무 — {targetJob.title}{' '}
           <span className="resume-target-co">({targetJob.company}{targetJob.url ? '' : ' · 예시 공고'})</span>
+          {targetLine && <p className="resume-target-line">&ldquo;{targetLine}&rdquo;</p>}
         </div>
       )}
 
